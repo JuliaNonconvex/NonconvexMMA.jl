@@ -10,8 +10,8 @@ import NonconvexCore: getobjectiveconstraints, getdim, Solution
 import NonconvexCore: assess_convergence!, optimize!
 
 using Reexport, Parameters, ChainRulesCore, ForwardDiff
-import Optim
-@reexport using NonconvexCore
+@reexport using NonconvexCore, Optim
+using NonconvexCore: optimize
 using NonconvexCore: @params, AbstractFunction, AbstractModel, VecModel
 using NonconvexCore: IneqConstraint, value_gradient, value_jacobian
 using NonconvexCore: AbstractOptimizer, Solution, ConvergenceCriteria
