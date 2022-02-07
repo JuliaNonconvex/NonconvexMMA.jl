@@ -45,11 +45,11 @@ include("mma_approx_docs.jl")
 
 # Models
 include("mma_model.jl")
-include("mmalag_model.jl")
+# include("mmalag_model.jl")
 include("dual_model.jl")
 
 # Algorithms
 include("mma_algorithm.jl")
-include("ammal.jl")
+# include("ammal.jl")
 
 end
