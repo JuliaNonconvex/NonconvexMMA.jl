@@ -112,7 +112,7 @@ end
 function MMAWorkspace(
     model::VecModel,
     optimizer::AbstractOptimizer,
-    x0::AbstractVector;
+    x0::AbstractVector{T};
     options = default_options(model, optimizer),
     convcriteria::ConvergenceCriteria = KKTCriteria(),
     plot_trace::Bool = false,
@@ -120,8 +120,7 @@ function MMAWorkspace(
     save_plot = nothing,
     callback::Function = plot_trace ? LazyPlottingCallback(; show_plot = show_plot, save_plot = save_plot) : NoCallback(),
     kwargs...,
-)
-    T = eltype(x0)
+) where {T}
     init!(model)
     dualmodel = MMADualModel(MMAApproxModel(model, x0; kwargs...))
 
@@ -466,8 +465,7 @@ function increaseρ!(
 end
 
 function getoptimobj(obj, minimize = true)
-    optimobj(z) = optimobj(1.0, nothing, z)
-    function optimobj(F, G, z)
+    return (F, G, z) -> begin
         if G !== nothing
             val, grad = value_gradient(obj, z)
             if minimize
@@ -493,5 +491,4 @@ function getoptimobj(obj, minimize = true)
         end
         return nothing
     end
-    return optimobj
 end
