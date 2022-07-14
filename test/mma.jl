@@ -1,6 +1,6 @@
 using NonconvexMMA, LinearAlgebra, Test, Zygote
 
-f(x::AbstractVector) = sqrt(x[2])
+f(x::AbstractVector) = x[2] < 0 ? Inf : sqrt(x[2])
 g(x::AbstractVector, a, b) = (a*x[1] + b)^3 - x[2]
 
 options = MMAOptions(
