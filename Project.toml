@@ -1,7 +1,7 @@
 name = "NonconvexMMA"
 uuid = "d3d89cbb-4ecd-4604-818d-8d1ff343e4da"
 authors = ["Mohamed Tarek <mohamed82008@gmail.com> and contributors"]
-version = "0.1.3"
+version = "0.1.4"
 
 [deps]
 ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
