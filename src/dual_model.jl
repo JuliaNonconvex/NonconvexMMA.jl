@@ -9,10 +9,10 @@ end
 
 The dual objective function of the MMA model, `model`. The approximate objective and constraint values are cached in `approxfg` when the dual objective is called. For every input `λ`, the optimal primal solution is computed and cached in the field `x`.
 """
-@params struct MMADualObj{TApprox <: AbstractMMAApprox} <: AbstractFunction
+struct MMADualObj{TApprox <: AbstractMMAApprox, Tx <: AbstractVector, Ta <: AbstractVector} <: AbstractFunction
     model::MMAApproxModel{TApprox}
-    x::AbstractVector # primal solution
-    approxfg::AbstractVector # approximate [f(x); g(x)]
+    x::Tx # primal solution
+    approxfg::Ta # approximate [f(x); g(x)]
 end
 
 """

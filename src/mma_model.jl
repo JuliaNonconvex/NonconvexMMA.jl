@@ -16,12 +16,12 @@ An approximate restricted model that uses the `MMAApprox` or `XMMAApprox` approx
 - `box_min`: the restricted lower bounds on the decision variables.
 - `box_max`: the restricted upper bounds on the decision variables.
 """
-@params struct MMAApproxModel{TApprox <: AbstractMMAApprox} <: AbstractModel
-    parent::VecModel
-    objective_ineq_constraints::AbstractFunction
+struct MMAApproxModel{TApprox <: AbstractMMAApprox, Tp <: VecModel, To <: AbstractFunction, Tmi <: AbstractVector, Tma <: AbstractVector} <: AbstractModel
+    parent::Tp
+    objective_ineq_constraints::To
     approx_objective_ineq_constraints::TApprox
-    box_min::AbstractVector
-    box_max::AbstractVector
+    box_min::Tmi
+    box_max::Tma
 end
 
 """
