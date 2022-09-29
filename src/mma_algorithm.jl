@@ -41,8 +41,10 @@ A struct that stores all the options of the MMA algorithms. Th following are the
  - `s_decr`: defined in the original [`MMA02`](@ref) paper.
  - `store_trace`: if true, a trace will be stored.
  - `dual_options`: the options passed to the dual optimizer from [`Optim.jl`](https://github.com/JuliaNLSolvers/Optim.jl).
+ - `convcriteria`: an instance of [`ConvergenceCriteria`](@ref) that specifies the convergence criteria of the MMA algorithm.
+ - `verbose`: true/false, when true prints convergence statistics.
 """
-@with_kw mutable struct MMAOptions{T, Ttol <: Tolerance, TSubOptions <: Optim.Options}
+@with_kw mutable struct MMAOptions{T, Ttol <: Tolerance, TSubOptions <: Optim.Options, TC <: ConvergenceCriteria}
     maxiter::Int = 1000
     outer_maxiter::Int = 10^8
     maxinner::Int = 10
@@ -60,6 +62,8 @@ A struct that stores all the options of the MMA algorithms. Th following are the
         iterations = 1000,
         outer_iterations=1000,
     )
+    convcriteria::TC = KKTCriteria()
+    verbose::Bool = true
 end
 
 """
@@ -83,7 +87,6 @@ A struct that stores all the intermediate states and memory allocations needed f
  - `ρ`: the `ρ` parameter as explained in [`MMAApprox`](@ref).
  - `tempx`: a temporary vector used to store the 2nd previous primal solution.
  - `options`: an instance of [`MMAOptions`](@ref) that resembles the options of the MMA algorithm.
- - `convcriteria`: an instance of [`ConvergenceCriteria`](@ref) that specifies the convergence criteria of the MMA algorithm.
  - `callback`: a function that is called on `solution` in every iteration of the algorithm. This can be used to store information about the optimization process.
  - `optimizer`: an instance of [`AbstractOptimizer`](@ref) such as `MMA87()` or `MMA02()` that specifies the variant of MMA used to optimize the model.
  - `suboptimizer`: the dual optimization algorithm used to optimize the barrier problem. This should be an [`Optim.jl`](https://github.com/JuliaNLSolvers/Optim.jl) optimizer.
@@ -100,7 +103,6 @@ A struct that stores all the intermediate states and memory allocations needed f
     σ::AbstractVector
     ρ::AbstractVector
     tempx::AbstractVector
-    convcriteria::ConvergenceCriteria
     callback::Function
     optimizer::AbstractOptimizer
     options
@@ -114,7 +116,6 @@ function MMAWorkspace(
     optimizer::AbstractOptimizer,
     x0::AbstractVector{T};
     options = default_options(model, optimizer),
-    convcriteria::ConvergenceCriteria = KKTCriteria(),
     plot_trace::Bool = false,
     show_plot::Bool = plot_trace,
     save_plot = nothing,
@@ -127,7 +128,7 @@ function MMAWorkspace(
     # Convergence
     λ = ones(getdim(getineqconstraints(model)))
     solution = Solution(dualmodel, λ)
-    assess_convergence!(solution, model, options.tol, convcriteria)
+    assess_convergence!(solution, model, options.tol, options.convcriteria, options.verbose, 0)
     correctsolution!(solution, model, options)
 
     # Trace
@@ -147,7 +148,6 @@ function MMAWorkspace(
         σ,
         ρ,
         tempx,
-        convcriteria,
         callback,
         optimizer,
         options,
@@ -183,11 +183,12 @@ function Workspace(model::VecModel, optimizer::Union{MMA87, MMA02}, args...; kwa
 end
 
 function optimize!(workspace::MMAWorkspace)
-    @unpack dualmodel, solution, convcriteria = workspace
+    @unpack dualmodel, solution = workspace
     @unpack callback, optimizer, options, trace = workspace
     @unpack x0, σ, ρ, outer_iter, iter, fcalls = workspace
     @unpack dualoptimizer = optimizer
     @unpack dual_options, maxiter, outer_maxiter, auto_scale = options
+    @unpack convcriteria, verbose = options
     @unpack prevx, x, g, λ = solution
     best_solution = deepcopy(solution)
 
@@ -292,7 +293,7 @@ function optimize!(workspace::MMAWorkspace)
             updatefg!(solution, fg, ∇fg)
 
             # Check if the algorithm has converged
-            assess_convergence!(solution, model, options.tol, convcriteria)
+            assess_convergence!(solution, model, options.tol, convcriteria, verbose, iter)
 
             # Callback, e.g. a trace plotting callback
             callback(solution)

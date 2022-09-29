@@ -3,11 +3,6 @@ using NonconvexMMA, LinearAlgebra, Test, Zygote
 f(x::AbstractVector) = x[2] < 0 ? Inf : sqrt(x[2])
 g(x::AbstractVector, a, b) = (a*x[1] + b)^3 - x[2]
 
-options = MMAOptions(
-    tol = Tolerance(kkt = 1e-6, f = 0.0),
-    s_init = 0.1,
-)
-
 @testset "Simple constraints" begin
     m = Model(f)
     addvar!(m, [0.0, 0.0], [10.0, 10.0])
@@ -16,7 +11,12 @@ options = MMAOptions(
 
     @testset "MMA $(alg isa MMA87 ? "1987" : "2002")" for alg in (MMA87(), MMA02())
         for convcriteria in (KKTCriteria(), IpoptCriteria())
-            r = NonconvexMMA.optimize(m, alg, [1.234, 2.345], options = options, convcriteria = convcriteria)
+            options = MMAOptions(;
+                tol = Tolerance(kkt = 1e-6, f = 0.0),
+                s_init = 0.1,
+                convcriteria,
+            )
+            r = NonconvexMMA.optimize(m, alg, [1.234, 2.345], options = options)
             @test abs(r.minimum - sqrt(8/27)) < 1e-6
             @test norm(r.minimizer - [1/3, 8/27]) < 1e-6
         end
@@ -30,7 +30,12 @@ end
 
     @testset "MMA $(alg isa MMA87 ? "1987" : "2002")" for alg in (MMA87(), MMA02())
         for convcriteria in (KKTCriteria(), IpoptCriteria())
-            r = NonconvexMMA.optimize(m, alg, [1.234, 2.345], options = options, convcriteria = convcriteria)
+            options = MMAOptions(;
+                tol = Tolerance(kkt = 1e-6, f = 0.0),
+                s_init = 0.1,
+                convcriteria,
+            )
+            r = NonconvexMMA.optimize(m, alg, [1.234, 2.345], options = options)
             @test abs(r.minimum - sqrt(8/27)) < 1e-6
             @test norm(r.minimizer - [1/3, 8/27]) < 1e-6
         end
@@ -46,7 +51,12 @@ end
 
         @testset "MMA $(alg isa MMA87 ? "1987" : "2002")" for alg in (MMA87(), MMA02())
             for convcriteria in (KKTCriteria(), IpoptCriteria())
-                r = NonconvexMMA.optimize(m, alg, [1.234, 2.345], options = options, convcriteria = convcriteria)
+                options = MMAOptions(;
+                    tol = Tolerance(kkt = 1e-6, f = 0.0),
+                    s_init = 0.1,
+                    convcriteria,
+                )
+                r = NonconvexMMA.optimize(m, alg, [1.234, 2.345], options = options)
                 @test abs(r.minimum - sqrt(8/27)) < 1e-6
                 @test norm(r.minimizer - [1/3, 8/27]) < 1e-6
             end
@@ -60,7 +70,12 @@ end
 
         @testset "MMA $(alg isa MMA87 ? "1987" : "2002")" for alg in (MMA87(), MMA02())
             for convcriteria in (KKTCriteria(), IpoptCriteria())
-                r = NonconvexMMA.optimize(m, alg, [1.234, 2.345], options = options, convcriteria = convcriteria)
+                options = MMAOptions(;
+                    tol = Tolerance(kkt = 1e-6, f = 0.0),
+                    s_init = 0.1,
+                    convcriteria,
+                )
+                r = NonconvexMMA.optimize(m, alg, [1.234, 2.345], options = options)
                 @test abs(r.minimum - sqrt(8/27)) < 1e-6
                 @test norm(r.minimizer - [1/3, 8/27]) < 1e-6
             end
@@ -74,7 +89,12 @@ end
 
         @testset "MMA $(alg isa MMA87 ? "1987" : "2002")" for alg in (MMA87(), MMA02())
             for convcriteria in (KKTCriteria(), IpoptCriteria())
-                r = NonconvexMMA.optimize(m, alg, [1.234, 2.345], options = options, convcriteria = convcriteria)
+                options = MMAOptions(;
+                    tol = Tolerance(kkt = 1e-6, f = 0.0),
+                    s_init = 0.1,
+                    convcriteria,
+                )
+                r = NonconvexMMA.optimize(m, alg, [1.234, 2.345], options = options)
                 @test abs(r.minimum - sqrt(8/27)) < 1e-6
                 @test norm(r.minimizer - [1/3, 8/27]) < 1e-6
             end
@@ -92,7 +112,12 @@ end
     add_ineq_constraint!(m, x -> g(x, -1, 1))
 
     for convcriteria in (KKTCriteria(), IpoptCriteria())
-        r = NonconvexMMA.optimize(m, MMA02(), [0.4, 0.5], options = options, convcriteria = convcriteria)
+        options = MMAOptions(;
+            tol = Tolerance(kkt = 1e-6, f = 0.0),
+            s_init = 0.1,
+            convcriteria,
+        )
+        r = NonconvexMMA.optimize(m, MMA02(), [0.4, 0.5], options = options)
         @test abs(r.minimum - sqrt(8/27)) < 1e-6
         @test norm(r.minimizer - [1/3, 8/27]) < 1e-6
     end
