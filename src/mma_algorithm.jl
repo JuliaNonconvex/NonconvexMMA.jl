@@ -6,7 +6,7 @@
 The original method of moving asymptotes (MMA) algorithm from the [1987 paper](https://onlinelibrary.wiley.com/doi/abs/10.1002/nme.1620240207).
 """
 @params struct MMA87 <: AbstractOptimizer
-    dualoptimizer
+    dualoptimizer::Any
 end
 function MMA87(; dualoptimizer = Optim.GradientDescent())
     return MMA87(dualoptimizer)
@@ -20,7 +20,7 @@ const MMA = MMA87
 The globally convergent method of moving asymptotes (MMA) algorithm from the [2002 paper](https://epubs.siam.org/doi/abs/10.1137/S1052623499362822).
 """
 @params struct MMA02 <: AbstractOptimizer
-    dualoptimizer
+    dualoptimizer::Any
 end
 function MMA02(; dualoptimizer = Optim.GradientDescent())
     return MMA02(dualoptimizer)
@@ -44,7 +44,12 @@ A struct that stores all the options of the MMA algorithms. Th following are the
  - `convcriteria`: an instance of [`ConvergenceCriteria`](@ref) that specifies the convergence criteria of the MMA algorithm.
  - `verbose`: true/false, when true prints convergence statistics.
 """
-@with_kw mutable struct MMAOptions{T, Ttol <: Tolerance, TSubOptions <: Optim.Options, TC <: ConvergenceCriteria}
+@with_kw mutable struct MMAOptions{
+    T,
+    Ttol<:Tolerance,
+    TSubOptions<:Optim.Options,
+    TC<:ConvergenceCriteria,
+}
     maxiter::Int = 1000
     outer_maxiter::Int = 10^8
     maxinner::Int = 10
@@ -60,7 +65,7 @@ A struct that stores all the options of the MMA algorithms. Th following are the
         allow_outer_f_increases = true,
         allow_f_increases = true,
         iterations = 1000,
-        outer_iterations=1000,
+        outer_iterations = 1000,
     )
     convcriteria::TC = KKTCriteria()
     verbose::Bool = true
@@ -105,11 +110,11 @@ A struct that stores all the intermediate states and memory allocations needed f
     tempx::AbstractVector
     callback::Function
     optimizer::AbstractOptimizer
-    options
+    options::Any
     trace::Trace
     outer_iter::Int
     iter::Int
-	fcalls::Int
+    fcalls::Int
 end
 function MMAWorkspace(
     model::VecModel,
@@ -119,7 +124,11 @@ function MMAWorkspace(
     plot_trace::Bool = false,
     show_plot::Bool = plot_trace,
     save_plot = nothing,
-    callback::Function = plot_trace ? LazyPlottingCallback(; show_plot = show_plot, save_plot = save_plot) : NoCallback(),
+    callback::Function = plot_trace ?
+                         LazyPlottingCallback(;
+        show_plot = show_plot,
+        save_plot = save_plot,
+    ) : NoCallback(),
     kwargs...,
 ) where {T}
     init!(model)
@@ -128,7 +137,14 @@ function MMAWorkspace(
     # Convergence
     λ = ones(getdim(getineqconstraints(model)))
     solution = Solution(dualmodel, λ)
-    assess_convergence!(solution, model, options.tol, options.convcriteria, options.verbose, 0)
+    assess_convergence!(
+        solution,
+        model,
+        options.tol,
+        options.convcriteria,
+        options.verbose,
+        0,
+    )
     correctsolution!(solution, model, options)
 
     # Trace
@@ -178,7 +194,7 @@ default_options(model::VecModel, alg::MMA02) = MMAOptions()
 
 init!(model::VecModel) = model
 
-function Workspace(model::VecModel, optimizer::Union{MMA87, MMA02}, args...; kwargs...)
+function Workspace(model::VecModel, optimizer::Union{MMA87,MMA02}, args...; kwargs...)
     return MMAWorkspace(model, optimizer, args...; kwargs...)
 end
 
@@ -221,7 +237,9 @@ function optimize!(workspace::MMAWorkspace)
     # Initialize the workspace's lift ρ, only used in MMA02
     initializeρ!(workspace)
 
-    while (!hasconverged(solution) || outer_iter == 0) && iter < maxiter && outer_iter < outer_maxiter
+    while (!hasconverged(solution) || outer_iter == 0) &&
+              iter < maxiter &&
+              outer_iter < outer_maxiter
         outer_iter += 1
 
         # Adapt workspace's trust region σ using s_incr and s_decr
@@ -240,19 +258,23 @@ function optimize!(workspace::MMAWorkspace)
         # Assume the convex approximation is not an upper bound approximation at x
         upperbounded = false
         prev_iter = iter
-        while (!hasconverged(solution) || outer_iter == 1) && !upperbounded && iter < maxiter && iter < prev_iter + options.maxinner
+        while (!hasconverged(solution) || outer_iter == 1) &&
+                  !upperbounded &&
+                  iter < maxiter &&
+                  iter < prev_iter + options.maxinner
             iter += 1
             # Solve the dual problem by minimizing negative the dual objective value
             if length(λ) > 0
                 λ .= 1.0
-                λ .= Optim.optimize(
-                    Optim.only_fg!(optimobj),
-                    λl,
-                    λu,
-                    λ,
-                    Optim.Fminbox(dualoptimizer),
-                    dual_options,
-                ).minimizer
+                λ .=
+                    Optim.optimize(
+                        Optim.only_fg!(optimobj),
+                        λl,
+                        λu,
+                        λ,
+                        Optim.Fminbox(dualoptimizer),
+                        dual_options,
+                    ).minimizer
             end
             if debugging[]
                 @show λ
@@ -270,10 +292,7 @@ function optimize!(workspace::MMAWorkspace)
             # Evaluates the exact objective and constraints and their gradients at the optimal x
             optimalx = getoptimalx(dualmodel)
 
-            fg, ∇fg = value_jacobian(
-                approxmodel.objective_ineq_constraints,
-                optimalx,
-            )
+            fg, ∇fg = value_jacobian(approxmodel.objective_ineq_constraints, optimalx)
             fcalls += 1
 
             # Scale the objective appropriately
@@ -303,7 +322,7 @@ function optimize!(workspace::MMAWorkspace)
         if options.keep_best
             best_solution = get_best_solution(solution, best_solution, options)
         else
-            best_solution = deepcopy(solution) 
+            best_solution = deepcopy(solution)
         end
         hasconverged(best_solution) && break
 
@@ -316,7 +335,7 @@ function optimize!(workspace::MMAWorkspace)
     # Reset the objective scaling factor to 1
     set_objective_multiple!(model, 1)
     callback(best_solution, update = true)
-    
+
     results = GenericResult(
         optimizer,
         x0,
@@ -337,13 +356,13 @@ end
 Scales the objective of `model` using the ratio of the ∞ norms of the constraint and objective values and gradients. After scaling, the ∞ norms will be the same.
 """
 function scaleobjective!(model::VecModel, fg, ∇fg, approxfg, λ)
-    @views normratio = norm(∇fg[2:end,:], Inf) / norm(∇fg[1,:], Inf)
+    @views normratio = norm(∇fg[2:end, :], Inf) / norm(∇fg[1, :], Inf)
     @views normratio = max(normratio, norm(fg[2:end], Inf) / abs(fg[1]))
     normratio = isfinite(normratio) ? normratio : one(normratio)
     set_objective_multiple!(model, get_objective_multiple(model) * normratio)
     fg[1] = fg[1] * normratio
     approxfg[1] = approxfg[1] * normratio
-    ∇fg[1,:] .= ∇fg[1,:] .* normratio
+    ∇fg[1, :] .= ∇fg[1, :] .* normratio
     scalequadweight!(model, normratio)
     λ .*= normratio
     return model
@@ -358,8 +377,8 @@ end
 
 function get_best_solution(solution::Solution, best_solution::Solution, options)
     best_infeas = best_solution.convstate.infeas
-    if max(solution.convstate.infeas, solution.convstate.kkt_residual) <= 
-        max(best_solution.convstate.infeas, best_solution.convstate.kkt_residual)
+    if max(solution.convstate.infeas, solution.convstate.kkt_residual) <=
+       max(best_solution.convstate.infeas, best_solution.convstate.kkt_residual)
         best_solution = deepcopy(solution)
     end
     return best_solution
@@ -418,7 +437,7 @@ function updateσ!(workspace::MMAWorkspace)
         if !isfinite(diff)
             diff = 1000 * one(T)
         end
-        min = diff/100
+        min = diff / 100
         max = 10diff
         if d <= min
             return min
@@ -449,14 +468,14 @@ function increaseρ!(
     @unpack x, prevx = solution
     T = eltype(x)
     w = zero(T)
-    for j in 1:length(x)
+    for j = 1:length(x)
         diff2 = (x[j] - prevx[j])^2
         w += diff2 / (σ[j]^2 - diff2)
     end
     w /= 2
 
     upperbounded = true
-    for i in 1:length(ρ)
+    for i = 1:length(ρ)
         if fg[i] > approxfg[i]
             upperbounded = false
             ρ[i] = min(10ρ[i], 1.1 * (ρ[i] + (fg[i] - approxfg[i]) / w))

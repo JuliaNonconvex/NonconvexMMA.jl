@@ -16,7 +16,13 @@ An approximate restricted model that uses the `MMAApprox` or `XMMAApprox` approx
 - `box_min`: the restricted lower bounds on the decision variables.
 - `box_max`: the restricted upper bounds on the decision variables.
 """
-struct MMAApproxModel{TApprox <: AbstractMMAApprox, Tp <: VecModel, To <: AbstractFunction, Tmi <: AbstractVector, Tma <: AbstractVector} <: AbstractModel
+struct MMAApproxModel{
+    TApprox<:AbstractMMAApprox,
+    Tp<:VecModel,
+    To<:AbstractFunction,
+    Tmi<:AbstractVector,
+    Tma<:AbstractVector,
+} <: AbstractModel
     parent::Tp
     objective_ineq_constraints::To
     approx_objective_ineq_constraints::TApprox
@@ -29,12 +35,7 @@ end
 
 Constructs an MMA approximation of the model `parent` around the point `x`. If `extended` is true, an [`XMMAApprox`](@ref) approximation is used. Otherwise, the default [`MMAApprox`](@ref) approximation is used. `kwargs` can be used to pass additional options to `XMMAApprox`, e.g. setting the coefficients.
 """
-function MMAApproxModel(
-    parent::VecModel,
-    x::AbstractVector;
-    extended = false,
-    kwargs...,
-)
+function MMAApproxModel(parent::VecModel, x::AbstractVector; extended = false, kwargs...)
     T = eltype(x)
     σ = map(1:length(x)) do j
         diff = getmax(parent, j) - getmin(parent, j)
@@ -45,12 +46,7 @@ function MMAApproxModel(
     end
     ρ = zeros(length(getineqconstraints(parent)) + 1)
     obj_constr = getobjectiveconstraints(parent)
-    approx_obj_constr = MMAApprox(
-        obj_constr,
-        x;
-        σ = σ,
-        ρ = ρ,
-    )
+    approx_obj_constr = MMAApprox(obj_constr, x; σ = σ, ρ = ρ)
     model = MMAApproxModel(
         parent,
         obj_constr,
@@ -62,50 +58,40 @@ function MMAApproxModel(
     return model
 end
 
-getmin(m::MMAApproxModel)= m.box_min
+getmin(m::MMAApproxModel) = m.box_min
 getmax(m::MMAApproxModel) = m.box_max
 
-@doc docρ
-getρ(model::MMAApproxModel) = getρ(model.approx_objective_ineq_constraints)
+@doc docρ getρ(model::MMAApproxModel) = getρ(model.approx_objective_ineq_constraints)
 
-@doc docρ
-function setρ!(model::MMAApproxModel, ρ)
+@doc docρ function setρ!(model::MMAApproxModel, ρ)
     setρ!(model.approx_objective_ineq_constraints, ρ)
     return model
 end
 
-@doc docσ
-getσ(model::MMAApproxModel) = getσ(model.approx_objective_ineq_constraints)
+@doc docσ getσ(model::MMAApproxModel) = getσ(model.approx_objective_ineq_constraints)
 
-@doc docσ
-function setσ!(model::MMAApproxModel, σ)
+@doc docσ function setσ!(model::MMAApproxModel, σ)
     setσ!(model.approx_objective_ineq_constraints, σ)
     return model
 end
 
-@doc docxk
-getxk(model::MMAApproxModel) = getxk(model.approx_objective_ineq_constraints)
+@doc docxk getxk(model::MMAApproxModel) = getxk(model.approx_objective_ineq_constraints)
 
-@doc docxk
-function setxk!(model::MMAApproxModel, x::AbstractVector)
+@doc docxk function setxk!(model::MMAApproxModel, x::AbstractVector)
     setxk!(model.approx_objective_ineq_constraints, x)
     return model
 end
 
-@doc docfk
-getfk(model::MMAApproxModel) = getfk(model.approx_objective_ineq_constraints)
+@doc docfk getfk(model::MMAApproxModel) = getfk(model.approx_objective_ineq_constraints)
 
-@doc docfk
-function setfk!(model::MMAApproxModel, f)
+@doc docfk function setfk!(model::MMAApproxModel, f)
     setfk!(model.approx_objective_ineq_constraints, f)
     return model
 end
 
-@doc doc∇fk
-get∇fk(model::MMAApproxModel) = get∇fk(model.approx_objective_ineq_constraints)
+@doc doc∇fk get∇fk(model::MMAApproxModel) = get∇fk(model.approx_objective_ineq_constraints)
 
-@doc doc∇fk
-function set∇fk!(model::MMAApproxModel, ∇f::AbstractVecOrMat)
+@doc doc∇fk function set∇fk!(model::MMAApproxModel, ∇f::AbstractVecOrMat)
     set∇fk!(model.approx_objective_ineq_constraints, ∇f)
     return model
 end

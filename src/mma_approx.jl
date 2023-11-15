@@ -73,7 +73,7 @@ end
 function MMAApprox(
     parent::AbstractFunction,
     x::AbstractVector,
-    f::Union{Real, AbstractVector},
+    f::Union{Real,AbstractVector},
     ∇f::AbstractMatrix;
     σ = fill(10.0, length(x)),
     ρ = f isa Real ? Ref(zero(f)) : zeros(length(f)),
@@ -101,9 +101,9 @@ Returns an approximation of the function `f.parent` at point `x`. See [`MMAAppro
 """
 function (f::MMAApprox{<:Base.RefValue{<:Real}})(x::AbstractVector)
     @unpack p, q, l, u, r, out = f
-    @assert all(l[j] < x[j] < u[j] for j in 1:length(x))
+    @assert all(l[j] < x[j] < u[j] for j = 1:length(x))
     _out = r[]
-    for j in 1:length(x)
+    for j = 1:length(x)
         _out += p[j] / (u[j] - x[j]) + q[j] / (x[j] - l[j])
     end
     out[] = ForwardDiff.value(_out)
@@ -111,11 +111,11 @@ function (f::MMAApprox{<:Base.RefValue{<:Real}})(x::AbstractVector)
 end
 function (f::MMAApprox{<:AbstractVector})(x::AbstractVector)
     @unpack p, q, l, u, r, out = f
-    @assert all(l[j] < x[j] < u[j] for j in 1:length(x))
+    @assert all(l[j] < x[j] < u[j] for j = 1:length(x))
     if eltype(x) <: ForwardDiff.Dual
         dual_out = map(1:getdim(f)) do i
             output = r[i]
-            for j in 1:length(x)
+            for j = 1:length(x)
                 output += p[i, j] / (u[j] - x[j]) + q[i, j] / (x[j] - l[j])
             end
             return output
@@ -123,9 +123,9 @@ function (f::MMAApprox{<:AbstractVector})(x::AbstractVector)
         out .= ForwardDiff.value.(dual_out)
         return dual_out
     else
-        for i in 1:getdim(f)
+        for i = 1:getdim(f)
             out[i] = r[i]
-            for j in 1:length(x)
+            for j = 1:length(x)
                 out[i] += p[i, j] / (u[j] - x[j]) + q[i, j] / (x[j] - l[j])
             end
         end
@@ -135,7 +135,7 @@ end
 
 function ChainRulesCore.rrule(f::MMAApprox{<:Base.RefValue{<:Real}}, x::AbstractVector)
     @unpack p, q, l, u, r = f
-    @assert all(f.l[j] < x[j] < f.u[j] for j in 1:length(x))
+    @assert all(f.l[j] < x[j] < f.u[j] for j = 1:length(x))
     out = f(x)
     adjoint = Δ -> begin
         if p isa AbstractMatrix
@@ -149,7 +149,7 @@ function ChainRulesCore.rrule(f::MMAApprox{<:Base.RefValue{<:Real}}, x::Abstract
 end
 function ChainRulesCore.rrule(f::MMAApprox{<:AbstractVector}, x::AbstractVector)
     @unpack p, q, l, u, r = f
-    @assert all(f.l[j] < x[j] < f.u[j] for j in 1:length(x))
+    @assert all(f.l[j] < x[j] < f.u[j] for j = 1:length(x))
     out = f(x)
     adjoint = Δ -> begin
         (nothing, (p ./ (u' .- x') .^ 2 .- q ./ (x' .- l') .^ 2)' * Δ)
@@ -217,17 +217,11 @@ end
 getparent(approx::MMAApprox) = approx.parent
 getdim(approx::MMAApprox) = getdim(getparent(approx))
 
-function updateapprox!(
-    approx::MMAApprox{<:Base.RefValue{<:Real}},
-    x::AbstractVector,
-)
+function updateapprox!(approx::MMAApprox{<:Base.RefValue{<:Real}}, x::AbstractVector)
     val, grad = value_gradient(getparent(approx), x)
     return updateapprox!(approx, x, val, grad)
 end
-function updateapprox!(
-    approx::MMAApprox{<:AbstractVector},
-    x::AbstractVector,
-)
+function updateapprox!(approx::MMAApprox{<:AbstractVector}, x::AbstractVector)
     val, jac = value_jacobian(getparent(approx), x)
     return updateapprox!(approx, x, val, jac)
 end
@@ -235,7 +229,7 @@ function updateapprox!(
     approx::MMAApprox{<:Base.RefValue{<:Real}},
     x::AbstractVector,
     f::Real,
-    ∇f::Union{AbstractVector, Adjoint{<:Any, <:AbstractVector}},
+    ∇f::Union{AbstractVector,Adjoint{<:Any,<:AbstractVector}},
 )
     setxk!(approx, x)
     setfk!(approx, f)
@@ -258,12 +252,12 @@ function updateapprox!(approx::MMAApprox{<:Base.RefValue{<:Real}})
     T = eltype(∇fk)
     l .= xk .- σ
     u .= xk .+ σ
-    for j in 1:length(p)
+    for j = 1:length(p)
         p[j] = σ[j] * σ[j] * max(0, ∇fk[j]) + ρ[] * σ[j] / 4
         q[j] = σ[j] * σ[j] * max(0, -∇fk[j]) + ρ[] * σ[j] / 4
     end
     r[] = fk[]
-    for j in 1:length(p)
+    for j = 1:length(p)
         r[] -= (p[j] + q[j]) / σ[j]
     end
     return approx
@@ -274,15 +268,15 @@ function updateapprox!(approx::MMAApprox{<:AbstractVector})
     l .= xk .- σ
     u .= xk .+ σ
     # All matrices are stored as Adjoint{<:Real, <:AbstractMatrix} for cache efficiency
-    for i in 1:size(p, 1)
-        for j in 1:size(p, 2)
+    for i = 1:size(p, 1)
+        for j = 1:size(p, 2)
             p[i, j] = σ[j] * σ[j] * max(0, ∇fk[i, j]) + ρ[i] * σ[j] / 4
             q[i, j] = σ[j] * σ[j] * max(0, -∇fk[i, j]) + ρ[i] * σ[j] / 4
         end
     end
-    for i in 1:size(p, 1)
+    for i = 1:size(p, 1)
         r[i] = fk[i]
-        for j in 1:size(p, 2)
+        for j = 1:size(p, 2)
             r[i] -= (p[i, j] + q[i, j]) / σ[j]
         end
     end

@@ -74,11 +74,13 @@ function (approx::XMMAApprox)(xyz::AbstractVector)
     @unpack mma, a, c, d = approx
     T = eltype(xyz)
     z = xyz[end]
-    y = xyz[end - length(c) : end - 1]
-    x = xyz[begin : end - length(c) - 1]
+    y = xyz[end-length(c):end-1]
+    x = xyz[begin:end-length(c)-1]
     approxfg = mma(x)
     ε = 1e-4
-    out = approxfg .+ [a[1] * z + ε * z^2 + sum(c .* y .+ d .* y.^2 ./ 2); .-a[2:end] .* z .- y]
+    out =
+        approxfg .+
+        [a[1] * z + ε * z^2 + sum(c .* y .+ d .* y .^ 2 ./ 2); .-a[2:end] .* z .- y]
     saveout!(approx, out)
     return out
 end
@@ -133,10 +135,7 @@ end
 getparent(approx::XMMAApprox) = getparent(approx.mma)
 getdim(approx::XMMAApprox) = getdim(approx.mma)
 
-function updateapprox!(
-    approx::XMMAApprox,
-    x::AbstractVector,
-)
+function updateapprox!(approx::XMMAApprox, x::AbstractVector)
     updateapprox!(approx.mma, x)
     return approx
 end

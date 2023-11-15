@@ -9,7 +9,8 @@ end
 
 The dual objective function of the MMA model, `model`. The approximate objective and constraint values are cached in `approxfg` when the dual objective is called. For every input `λ`, the optimal primal solution is computed and cached in the field `x`.
 """
-struct MMADualObj{TApprox <: AbstractMMAApprox, Tx <: AbstractVector, Ta <: AbstractVector} <: AbstractFunction
+struct MMADualObj{TApprox<:AbstractMMAApprox,Tx<:AbstractVector,Ta<:AbstractVector} <:
+       AbstractFunction
     model::MMAApproxModel{TApprox}
     x::Tx # primal solution
     approxfg::Ta # approximate [f(x); g(x)]
@@ -86,7 +87,7 @@ function optimizeprimal!(f::MMADualObj{TA}, λ::AbstractVector) where {TA}
 
     if TA <: XMMAApprox
         @unpack a, c, d = model.approx_objective_ineq_constraints
-        map!(view(x, size(p, 2) + 1 : size(p, 2) + length(c)), 1:length(c)) do i
+        map!(view(x, size(p, 2)+1:size(p, 2)+length(c)), 1:length(c)) do i
             temp = c[i] - λ[i]
             if temp >= 0
                 return zero(T)
@@ -155,31 +156,23 @@ getoptimalx(m::MMADualModel) = getoptimalx(m.obj)
 
 getparent(m::MMADualModel) = m.parent
 
-@doc docσ
-getσ(m::MMADualModel) = getσ(getparent(m))
+@doc docσ getσ(m::MMADualModel) = getσ(getparent(m))
 
-@doc docσ
-setσ!(m::MMADualModel, σ) = setσ!(getparent(m), σ)
+@doc docσ setσ!(m::MMADualModel, σ) = setσ!(getparent(m), σ)
 
-@doc docρ
-getρ(m::MMADualModel) = getρ(getparent(m))
+@doc docρ getρ(m::MMADualModel) = getρ(getparent(m))
 
-@doc docρ
-setρ!(m::MMADualModel, ρ) = setρ!(getparent(m), ρ)
+@doc docρ setρ!(m::MMADualModel, ρ) = setρ!(getparent(m), ρ)
 
-@doc docupdateapprox!
-function updateapprox!(m::MMADualModel, args...)
+@doc docupdateapprox! function updateapprox!(m::MMADualModel, args...)
     updateapprox!(getparent(m), args...)
     return m
 end
 
 getobjective(m::MMADualModel) = m.obj
 
-@doc docxk
-getxk(m::MMADualModel) = getxk(getparent(m))
+@doc docxk getxk(m::MMADualModel) = getxk(getparent(m))
 
-@doc docfk
-getfk(m::MMADualModel) = getfk(getparent(m))
+@doc docfk getfk(m::MMADualModel) = getfk(getparent(m))
 
-@doc doc∇fk
-get∇fk(m::MMADualModel) = get∇fk(getparent(m))
+@doc doc∇fk get∇fk(m::MMADualModel) = get∇fk(getparent(m))

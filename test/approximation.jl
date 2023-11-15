@@ -2,7 +2,7 @@ using NonconvexMMA, LinearAlgebra, Test, Zygote, FiniteDifferences
 const FDM = FiniteDifferences
 
 f(x::AbstractVector) = sqrt(x[2])
-g(x::AbstractVector, a, b) = (a*x[1] + b)^3 - x[2]
+g(x::AbstractVector, a, b) = (a * x[1] + b)^3 - x[2]
 
 _m = Model(f)
 addvar!(_m, [0.0, 0.0], [10.0, 10.0])
@@ -22,10 +22,10 @@ x = fill(0.5, 2)
     grad5 = FDM.grad(central_fdm(5, 1), approxf, x)[1]
     @test val1 ≈ val2 ≈ val3 ≈ val4
     @test grad1 ≈ grad2 ≈ grad3 ≈ grad4 ≈ grad5
-    for i in 1:100
-        y = rand(2)*10
+    for i = 1:100
+        y = rand(2) * 10
         H = Zygote.hessian(approxf, y)
-        for i in 1:2, j in 1:2
+        for i = 1:2, j = 1:2
             if i == j
                 @test H[i, j] >= 0
             else
@@ -43,10 +43,10 @@ x = fill(0.5, 2)
     grad5 = FDM.grad(central_fdm(5, 1), approxf, x)[1]
     @test val1 ≈ val2 ≈ val3 ≈ val4
     @test grad1 ≈ grad2 ≈ grad3 ≈ grad4 ≈ grad5
-    for i in 1:100
-        y = rand(2)*10
+    for i = 1:100
+        y = rand(2) * 10
         H = Zygote.hessian(approxf, y)
-        for i in 1:2, j in 1:2
+        for i = 1:2, j = 1:2
             if i == j
                 @test H[i, j] >= 0
             else
@@ -59,11 +59,13 @@ x = fill(0.5, 2)
     approxf = NonconvexMMA.MMAApprox(exactf, x)
     val1, jac1 = NonconvexCore.value_jacobian(exactf, x)
     val2 = exactf(x)
-    jac2 = vcat([Zygote.gradient(x -> exactf(x)[i], x)[1]' for i in 1:length(val2)]...)
+    jac2 = vcat([Zygote.gradient(x -> exactf(x)[i], x)[1]' for i = 1:length(val2)]...)
     val3, jac3 = NonconvexCore.value_jacobian(approxf, x)
     val4 = approxf(x)
-    jac4 = vcat([Zygote.gradient(x -> approxf(x)[i], x)[1]' for i in 1:length(val2)]...)
-    jac5 = vcat([FDM.grad(central_fdm(5, 1), x -> approxf(x)[i], x)[1]' for i in 1:length(val2)]...)
+    jac4 = vcat([Zygote.gradient(x -> approxf(x)[i], x)[1]' for i = 1:length(val2)]...)
+    jac5 = vcat(
+        [FDM.grad(central_fdm(5, 1), x -> approxf(x)[i], x)[1]' for i = 1:length(val2)]...,
+    )
 
     @test val1 ≈ val2 ≈ val3 ≈ val4
     @test jac1 ≈ jac2 ≈ jac3 ≈ jac4 ≈ jac5
@@ -106,7 +108,7 @@ end
         grad2 = FDM.grad(central_fdm(5, 1), x -> dualobj(x, λ), optimalx)[1]
         @test grad1 ≈ grad2
         @test all(1:length(x)) do j
-            abs(grad1[j]) <= 1e-6 || 
+            abs(grad1[j]) <= 1e-6 ||
                 optimalx[j] == 0 && grad1[j] > 0 ||
                 optimalx[j] == 10 && grad1[j] < 0
         end

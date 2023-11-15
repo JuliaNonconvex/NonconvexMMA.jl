@@ -23,13 +23,11 @@ docσ = """
 Get or set the move limit `σ` of the MMA approximation `approx`. See [`MMAApprox`](@ref) for an explanation.
 """
 
-@doc docσ
-function getσ(approx::AbstractMMAApprox)
+@doc docσ function getσ(approx::AbstractMMAApprox)
     throw("`getσ` is not defined.")
 end
 
-@doc docσ
-function setσ!(approx::AbstractMMAApprox, σ)
+@doc docσ function setσ!(approx::AbstractMMAApprox, σ)
     throw("`setσ!` is not defined.")
 end
 
@@ -40,13 +38,11 @@ docρ = """
 Get or set the value of `ρ` in `approx`. See [`MMAApprox`](@ref) for an explanation.
 """
 
-@doc docρ
-function getρ(approx::AbstractMMAApprox)
+@doc docρ function getρ(approx::AbstractMMAApprox)
     throw("`getρ` is not defined.")
 end
 
-@doc docρ
-function setρ!(approx::AbstractMMAApprox, ρ)
+@doc docρ function setρ!(approx::AbstractMMAApprox, ρ)
     throw("`setρ!` is not defined.")
 end
 
@@ -57,13 +53,11 @@ docfk = """
 Get or set the function value `fk` of the approximated function at the approximation point `xk` of `approx`.
 """
 
-@doc docfk
-function getfk(approx::AbstractMMAApprox)
+@doc docfk function getfk(approx::AbstractMMAApprox)
     throw("`getfk` is not defined.")
 end
 
-@doc docfk
-function setfk!(approx::AbstractMMAApprox, f)
+@doc docfk function setfk!(approx::AbstractMMAApprox, f)
     throw("`setfk!` is not defined.")
 end
 
@@ -74,13 +68,11 @@ docxk = """
 Get or set the approximation point `xk` of `approx`.
 """
 
-@doc docxk
-function getxk(approx::AbstractMMAApprox)
+@doc docxk function getxk(approx::AbstractMMAApprox)
     throw("`getfk` is not defined.")
 end
 
-@doc docxk
-function setxk!(approx::AbstractMMAApprox, x::AbstractVector)
+@doc docxk function setxk!(approx::AbstractMMAApprox, x::AbstractVector)
     throw("`setxk!` is not defined.")
 end
 
@@ -91,13 +83,11 @@ doc∇fk = """
 Get or set the value of the gradient/Jacobian, `∇fk`, of the approximated function at the approximation point `xk`.
 """
 
-@doc doc∇fk
-function get∇fk(approx::AbstractMMAApprox)
+@doc doc∇fk function get∇fk(approx::AbstractMMAApprox)
     throw("`get∇fk` is not defined.")
 end
 
-@doc doc∇fk
-function set∇fk!(approx::AbstractMMAApprox, ∇f::AbstractVecOrMat)
+@doc doc∇fk function set∇fk!(approx::AbstractMMAApprox, ∇f::AbstractVecOrMat)
     throw("`set∇fk!` is not defined.")
 end
 
@@ -107,8 +97,7 @@ docupdateapprox! = """
 Updates the MMA approximation in `f` making it around the point `x`.
 """
 
-@doc docupdateapprox!
-function updateapprox!(approx::AbstractMMAApprox, x::AbstractVector)
+@doc docupdateapprox! function updateapprox!(approx::AbstractMMAApprox, x::AbstractVector)
     throw("`updateapprox` is not defined.")
 end
 
