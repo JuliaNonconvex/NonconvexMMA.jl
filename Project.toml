@@ -1,7 +1,7 @@
 name = "NonconvexMMA"
 uuid = "d3d89cbb-4ecd-4604-818d-8d1ff343e4da"
 authors = ["Mohamed Tarek <mohdibntarek@gmail.com> and contributors"]
-version = "1.1.0"
+version = "1.1.1"
 
 [deps]
 ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
@@ -21,7 +21,7 @@ NonconvexCore = "1.4"
 Optim = "1.2"
 Parameters = "0.12, 0.13"
 Reexport = "1"
-Zygote = "0.6"
+Zygote = "0.6, 0.7"
 julia = "1"
 
 [extras]
