@@ -164,11 +164,11 @@ getasymptotes(approx::MMAApprox) = approx.l, approx.u
 
 getapproxfg(approx::MMAApprox) = approx.out
 
-getσ(approx::MMAApprox{<:Base.RefValue{<:Real}}) = approx.σ[]
+getσ(approx::MMAApprox{<:Base.RefValue{<:Real}}) = approx.σ
 getσ(approx::MMAApprox{<:AbstractVector}) = approx.σ
 
 function setσ!(approx::MMAApprox{<:Base.RefValue{<:Real}}, σ::Real)
-    approx.σ[] = σ
+    approx.σ .= σ
     return approx
 end
 function setσ!(approx::MMAApprox{<:AbstractVector}, σ::AbstractVector)

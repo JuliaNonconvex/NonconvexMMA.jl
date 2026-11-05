@@ -119,3 +119,54 @@ end
         @test norm(r.minimizer - [1 / 3, 8 / 27]) < 1e-6
     end
 end
+
+@testset "auto_scale reports the correct objective value" begin
+    m = Model(f)
+    addvar!(m, [0.0, 0.0], [10.0, 10.0])
+    add_ineq_constraint!(m, x -> g(x, 2, 0))
+    add_ineq_constraint!(m, x -> g(x, -1, 1))
+    options = MMAOptions(;
+        tol = Tolerance(kkt = 1e-6, f = 0.0),
+        s_init = 0.1,
+        auto_scale = true,
+        verbose = false,
+    )
+    r = NonconvexMMA.optimize(m, MMA87(), [1.234, 2.345], options = options)
+    @test abs(r.minimum - sqrt(8 / 27)) < 1e-6
+    @test norm(r.minimizer - [1 / 3, 8 / 27]) < 1e-6
+end
+
+@testset "reset! works" begin
+    m = Model(x -> (x[1] - 1)^2 + (x[2] + 2)^2)
+    addvar!(m, [-5.0, -5.0], [5.0, 5.0])
+    vm, x0, _ = NonconvexCore.tovecmodel(m)
+    w = NonconvexMMA.MMAWorkspace(vm, MMA87(), x0; options = MMAOptions(verbose = false))
+    NonconvexCore.reset!(w, [0.5, -1.5])
+    r = NonconvexCore.optimize!(w)
+    @test norm(r.minimizer - [1.0, -2.0]) < 0.1
+end
+
+@testset "Fixed variables do not crash" begin
+    m = Model(x -> (x[1] - 2)^2 + (x[2] - 3)^2)
+    addvar!(m, [2.0, 3.0], [2.0, 3.0])
+    r = NonconvexMMA.optimize(m, MMA87(), [2.0, 3.0], options = MMAOptions(verbose = false))
+    @test r.minimum < 1e-6
+    @test norm(r.minimizer - [2.0, 3.0]) < 1e-6
+end
+
+@testset "optimize without x0" begin
+    m = Model(x -> (x[1] - 1)^2 + (x[2] + 2)^2)
+    addvar!(m, [0.0, -3.0], [2.0, -1.0])
+    r = NonconvexMMA.optimize(m, MMA87(), options = MMAOptions(verbose = false))
+    @test norm(r.minimizer - [1.0, -2.0]) < 1e-2
+end
+
+@testset "scalar MMAApprox getsigma" begin
+    approx =
+        NonconvexMMA.MMAApprox(FunctionWrapper(x -> x[1]^2 + x[2]^2, 1), [1.0, 2.0])
+    σ = NonconvexMMA.getσ(approx)
+    @test σ isa AbstractVector
+    @test length(σ) == 2
+    NonconvexMMA.setσ!(approx, 0.5)
+    @test all(==(0.5), NonconvexMMA.getσ(approx))
+end
