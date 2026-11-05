@@ -176,7 +176,7 @@ end
 
 function reset!(w::MMAWorkspace, x0 = nothing)
     @unpack solution = w
-    outer_iter, iter, fcalls = 0, 0, 0, 0
+    outer_iter, iter, fcalls = 0, 0, 0
     @pack! w = fcalls, iter, outer_iter
     if x0 !== nothing
         w.x0 .= x0
@@ -196,6 +196,14 @@ init!(model::VecModel) = model
 
 function Workspace(model::VecModel, optimizer::Union{MMA87,MMA02}, args...; kwargs...)
     return MMAWorkspace(model, optimizer, args...; kwargs...)
+end
+function Workspace(
+    model::VecModel,
+    optimizer::Union{MMA87,MMA02};
+    options = default_options(model, optimizer),
+    kwargs...,
+)
+    return MMAWorkspace(model, optimizer, getinit(model); options = options, kwargs...)
 end
 
 function optimize!(workspace::MMAWorkspace)
@@ -265,7 +273,6 @@ function optimize!(workspace::MMAWorkspace)
             iter += 1
             # Solve the dual problem by minimizing negative the dual objective value
             if length(λ) > 0
-                λ .= 1.0
                 λ .=
                     Optim.optimize(
                         Optim.only_fg!(optimobj),
@@ -302,7 +309,7 @@ function optimize!(workspace::MMAWorkspace)
 
             # Check if the approximation is an upper bound at the current x.
             # If not, increase ρ. Only used in MMA02
-            if iter > 1
+            if iter > 1 || optimizer isa MMA87
                 upperbounded = increaseρ!(workspace, fg, approxfg, optimizer)
                 upperbounded || setρ!(dualmodel, ρ)
             end
@@ -332,7 +339,8 @@ function optimize!(workspace::MMAWorkspace)
     @pack! workspace = outer_iter, iter, fcalls
     workspace.solution = best_solution
 
-    # Reset the objective scaling factor to 1
+    # Undo the accumulated objective scaling and reset the objective scaling factor to 1
+    correctsolution!(best_solution, model, options)
     set_objective_multiple!(model, 1)
     callback(best_solution, update = true)
 
@@ -409,6 +417,10 @@ function initializeσ!(workspace::MMAWorkspace)
         diff = getmax(model, j) - getmin(model, j)
         if !isfinite(diff)
             diff = 1000 * one(T)
+        elseif iszero(diff)
+            # Fixed variables (equal bounds) need a nonzero move limit to keep the
+            # strict asymptote inequality l < x < u satisfiable.
+            diff = one(T)
         end
         return options.s_init * diff
     end
@@ -436,6 +448,10 @@ function updateσ!(workspace::MMAWorkspace)
         diff = getmax(model, j) - getmin(model, j)
         if !isfinite(diff)
             diff = 1000 * one(T)
+        elseif iszero(diff)
+            # Fixed variables (equal bounds) need a nonzero move limit to keep the
+            # strict asymptote inequality l < x < u satisfiable.
+            diff = one(T)
         end
         min = diff / 100
         max = 10diff
