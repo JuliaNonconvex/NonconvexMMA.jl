@@ -197,6 +197,14 @@ init!(model::VecModel) = model
 function Workspace(model::VecModel, optimizer::Union{MMA87,MMA02}, args...; kwargs...)
     return MMAWorkspace(model, optimizer, args...; kwargs...)
 end
+function Workspace(
+    model::VecModel,
+    optimizer::Union{MMA87,MMA02};
+    options = default_options(model, optimizer),
+    kwargs...,
+)
+    return MMAWorkspace(model, optimizer, getinit(model); options = options, kwargs...)
+end
 
 function optimize!(workspace::MMAWorkspace)
     @unpack dualmodel, solution = workspace

@@ -16,7 +16,7 @@ using NonconvexCore: @params, AbstractFunction, AbstractModel, VecModel
 using NonconvexCore: IneqConstraint, value_gradient, value_jacobian
 using NonconvexCore: AbstractOptimizer, Solution, ConvergenceCriteria
 using NonconvexCore: ConvergenceState, hasconverged, debugging
-using NonconvexCore: getnvars, GenericResult
+using NonconvexCore: getnvars, GenericResult, getinit
 
 """
     Solution(dualmodel, λ)
