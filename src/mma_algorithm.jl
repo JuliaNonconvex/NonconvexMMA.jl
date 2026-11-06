@@ -275,7 +275,8 @@ function optimize!(workspace::MMAWorkspace)
             if length(λ) > 0
                 λ .=
                     Optim.optimize(
-                        optimobj,
+                        z -> optimobj(1.0, nothing, z),
+                        (G, z) -> optimobj(1.0, G, z),
                         λl,
                         λu,
                         λ,
