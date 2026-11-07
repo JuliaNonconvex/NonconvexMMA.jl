@@ -14,6 +14,14 @@ end
 
 const MMA = MMA87
 
+NonconvexCore.solver_capabilities(::MMA87) = ConstraintCapabilities(
+    eq = false,
+    ineq = true,
+    sd = false,
+    box = true,
+    integer = false,
+)
+
 """
     MMA02
 
@@ -27,6 +35,14 @@ function MMA02(; dualoptimizer = Optim.GradientDescent())
 end
 
 const GCMMA = MMA02
+
+NonconvexCore.solver_capabilities(::MMA02) = ConstraintCapabilities(
+    eq = false,
+    ineq = true,
+    sd = false,
+    box = true,
+    integer = false,
+)
 
 @doc """
     GCMMA
