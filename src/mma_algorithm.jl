@@ -17,7 +17,7 @@ const MMA = MMA87
 """
     MMA02
 
-The globally convergent method of moving asymptotes (MMA) algorithm from the [2002 paper](https://epubs.siam.org/doi/abs/10.1137/S1052623499362822).
+The globally convergent method of moving asymptotes (MMA) algorithm from the [2002 paper](https://epubs.siam.org/doi/abs/10.1137/S1052623499362822). This is the method commonly called GCMMA in the literature. Unlike [`MMA87`](@ref), it runs inner iterations that increase the lift parameter `ρ` until the convex separable approximation upper-bounds the original functions, which yields the global convergence guarantee of the 2002 paper.
 """
 @params struct MMA02 <: AbstractOptimizer
     dualoptimizer::Any
@@ -27,6 +27,13 @@ function MMA02(; dualoptimizer = Optim.GradientDescent())
 end
 
 const GCMMA = MMA02
+
+@doc """
+    GCMMA
+
+The globally convergent method of moving asymptotes (GCMMA) from the
+[2002 paper](https://epubs.siam.org/doi/abs/10.1137/S1052623499362822). This is an alias of [`MMA02`](@ref): the 2002 paper's conservative variant of MMA with inner iterations on the lift parameter `ρ`.
+""" GCMMA
 
 """
     MMAOptions
