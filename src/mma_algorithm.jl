@@ -20,6 +20,7 @@ NonconvexCore.solver_capabilities(::MMA87) = ConstraintCapabilities(
     sd = false,
     box = true,
     integer = false,
+        infinite_bounds = true,
 )
 
 """
@@ -42,6 +43,7 @@ NonconvexCore.solver_capabilities(::MMA02) = ConstraintCapabilities(
     sd = false,
     box = true,
     integer = false,
+        infinite_bounds = true,
 )
 
 @doc """
