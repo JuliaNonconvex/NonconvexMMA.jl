@@ -22,10 +22,10 @@ x = fill(0.5, 2)
     grad5 = FDM.grad(central_fdm(5, 1), approxf, x)[1]
     @test val1 ≈ val2 ≈ val3 ≈ val4
     @test grad1 ≈ grad2 ≈ grad3 ≈ grad4 ≈ grad5
-    for i = 1:100
+    for i in 1:100
         y = rand(2) * 10
         H = Zygote.hessian(approxf, y)
-        for i = 1:2, j = 1:2
+        for i in 1:2, j in 1:2
             if i == j
                 @test H[i, j] >= 0
             else
@@ -43,10 +43,10 @@ x = fill(0.5, 2)
     grad5 = FDM.grad(central_fdm(5, 1), approxf, x)[1]
     @test val1 ≈ val2 ≈ val3 ≈ val4
     @test grad1 ≈ grad2 ≈ grad3 ≈ grad4 ≈ grad5
-    for i = 1:100
+    for i in 1:100
         y = rand(2) * 10
         H = Zygote.hessian(approxf, y)
-        for i = 1:2, j = 1:2
+        for i in 1:2, j in 1:2
             if i == j
                 @test H[i, j] >= 0
             else
@@ -59,12 +59,12 @@ x = fill(0.5, 2)
     approxf = NonconvexMMA.MMAApprox(exactf, x)
     val1, jac1 = NonconvexCore.value_jacobian(exactf, x)
     val2 = exactf(x)
-    jac2 = vcat([Zygote.gradient(x -> exactf(x)[i], x)[1]' for i = 1:length(val2)]...)
+    jac2 = vcat([Zygote.gradient(x -> exactf(x)[i], x)[1]' for i in 1:length(val2)]...)
     val3, jac3 = NonconvexCore.value_jacobian(approxf, x)
     val4 = approxf(x)
-    jac4 = vcat([Zygote.gradient(x -> approxf(x)[i], x)[1]' for i = 1:length(val2)]...)
+    jac4 = vcat([Zygote.gradient(x -> approxf(x)[i], x)[1]' for i in 1:length(val2)]...)
     jac5 = vcat(
-        [FDM.grad(central_fdm(5, 1), x -> approxf(x)[i], x)[1]' for i = 1:length(val2)]...,
+        [FDM.grad(central_fdm(5, 1), x -> approxf(x)[i], x)[1]' for i in 1:length(val2)]...
     )
 
     @test val1 ≈ val2 ≈ val3 ≈ val4

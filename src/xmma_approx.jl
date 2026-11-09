@@ -51,9 +51,9 @@ Constructs an instance of the extended MMA approximation `XMMAApprox` using the 
 """
 function XMMAApprox(
     mma::MMAApprox,
-    a = fill(1.0, size(mma.p, 1)),
-    c = fill(1.1, size(mma.p, 1) - 1),
-    d = fill(1.0, size(mma.p, 1) - 1),
+    a=fill(1.0, size(mma.p, 1)),
+    c=fill(1.1, size(mma.p, 1) - 1),
+    d=fill(1.0, size(mma.p, 1) - 1),
     kwargs...,
 )
     x0 = getxk(mma)
@@ -74,8 +74,8 @@ function (approx::XMMAApprox)(xyz::AbstractVector)
     @unpack mma, a, c, d = approx
     T = eltype(xyz)
     z = xyz[end]
-    y = xyz[end-length(c):end-1]
-    x = xyz[begin:end-length(c)-1]
+    y = xyz[(end - length(c)):(end - 1)]
+    x = xyz[begin:(end - length(c) - 1)]
     approxfg = mma(x)
     ε = 1e-4
     out =
@@ -140,10 +140,7 @@ function updateapprox!(approx::XMMAApprox, x::AbstractVector)
     return approx
 end
 function updateapprox!(
-    approx::XMMAApprox,
-    x::AbstractVector,
-    f::AbstractVector,
-    ∇f::AbstractMatrix,
+    approx::XMMAApprox, x::AbstractVector, f::AbstractVector, ∇f::AbstractMatrix
 )
     updateapprox!(approx.mma, x, f, ∇f)
     return approx
