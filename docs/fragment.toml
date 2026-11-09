@@ -1,0 +1,11 @@
+name = "MMA"
+modules = ["NonconvexMMA"]
+doctest_setup = "using NonconvexMMA"
+
+[[pages]]
+title = "MMA"
+file = "index.md"
+
+[[pages]]
+title = "Docstrings"
+file = "docstrings.md"
