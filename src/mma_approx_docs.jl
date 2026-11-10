@@ -4,7 +4,7 @@
 Returns the asymptotes of the MMA approximation `approx`.
 """
 function getasymptotes(approx::AbstractMMAApprox)
-    throw("`getasymptotes` is not defined.")
+    return throw("`getasymptotes` is not defined.")
 end
 
 """
@@ -13,7 +13,7 @@ end
 Returns the last cached value of the output of `approx`.
 """
 function getapproxfg(approx::AbstractMMAApprox)
-    throw("`getapproxfg` is not defined.")
+    return throw("`getapproxfg` is not defined.")
 end
 
 docσ = """
@@ -107,7 +107,7 @@ end
 Updates the MMA approximation `approx` making it around the point `x` where `f` is the value of the approximated function at `x` and `∇f` is its gradient if `f` is a number and the Jacobian if `f` is a vector.
 """
 function updateapprox!(approx::AbstractMMAApprox, x, f, ∇f)
-    throw("`updateapprox` is not defined.")
+    return throw("`updateapprox` is not defined.")
 end
 
 """
@@ -116,5 +116,5 @@ end
 Updates the MMA approximation `approx`. This is called when `σ`, `ρ` or `xk` change.
 """
 function updateapprox!(approx::AbstractMMAApprox)
-    throw("`updateapprox` is not defined.")
+    return throw("`updateapprox` is not defined.")
 end

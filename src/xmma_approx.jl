@@ -39,7 +39,7 @@ end
 """
 ```
 XMMAApprox(
-    mma::MMAApprox,
+    mma::MMAApprox;
     a = fill(1.0, size(mma.p, 1)),
     c = fill(1.1, size(mma.p, 1) - 1),
     d = fill(1.0, size(mma.p, 1) - 1),
@@ -50,12 +50,24 @@ XMMAApprox(
 Constructs an instance of the extended MMA approximation `XMMAApprox` using the MMA approximation `mma` and coefficients `a`, `b` and `c`. See [`XMMAApprox`](@ref) for an explanation.
 """
 function XMMAApprox(
-    mma::MMAApprox,
-    a = fill(1.0, size(mma.p, 1)),
-    c = fill(1.1, size(mma.p, 1) - 1),
-    d = fill(1.0, size(mma.p, 1) - 1),
+    mma::MMAApprox;
+    a=fill(1.0, size(mma.p, 1)),
+    c=fill(1.1, size(mma.p, 1) - 1),
+    d=fill(1.0, size(mma.p, 1) - 1),
     kwargs...,
 )
+    return _xmma_approx_nt(mma, (; a, c, d, kwargs...))
+end
+# A positional-NamedTuple path: JET (on Julia 1.13) cannot resolve
+# `Core.kwcall` on keyword-only constructors during its virtual top-level
+# replay, so forwarded options go through this positional method.
+function XMMAApprox(mma::MMAApprox, nt::NamedTuple)
+    return _xmma_approx_nt(mma, nt)
+end
+function _xmma_approx_nt(mma::MMAApprox, nt::NamedTuple)
+    a = get(nt, :a, fill(1.0, size(mma.p, 1)))
+    c = get(nt, :c, fill(1.1, size(mma.p, 1) - 1))
+    d = get(nt, :d, fill(1.0, size(mma.p, 1) - 1))
     x0 = getxk(mma)
     T = eltype(x0)
     approxfg = mma(x0)
@@ -74,8 +86,8 @@ function (approx::XMMAApprox)(xyz::AbstractVector)
     @unpack mma, a, c, d = approx
     T = eltype(xyz)
     z = xyz[end]
-    y = xyz[end-length(c):end-1]
-    x = xyz[begin:end-length(c)-1]
+    y = xyz[(end - length(c)):(end - 1)]
+    x = xyz[begin:(end - length(c) - 1)]
     approxfg = mma(x)
     ε = 1e-4
     out =
@@ -90,11 +102,11 @@ end
 
 Saves `out` in the cache `approx.out`.
 """
-function saveout!(approx::XMMAApprox, out)
+function saveout!(approx::AbstractMMAApprox, out)
     approx.out .= out
     return approx
 end
-ChainRulesCore.@non_differentiable saveout!(approx::XMMAApprox, out)
+ChainRulesCore.@non_differentiable saveout!(approx::AbstractMMAApprox, out)
 
 getmmaapprox(approx::XMMAApprox) = approx.mma
 
@@ -140,10 +152,7 @@ function updateapprox!(approx::XMMAApprox, x::AbstractVector)
     return approx
 end
 function updateapprox!(
-    approx::XMMAApprox,
-    x::AbstractVector,
-    f::AbstractVector,
-    ∇f::AbstractMatrix,
+    approx::XMMAApprox, x::AbstractVector, f::AbstractVector, ∇f::AbstractMatrix
 )
     updateapprox!(approx.mma, x, f, ∇f)
     return approx
