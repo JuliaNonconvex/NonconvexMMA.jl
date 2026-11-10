@@ -87,7 +87,7 @@ function optimizeprimal!(f::MMADualObj{TA}, λ::AbstractVector) where {TA}
 
     if TA <: XMMAApprox
         @unpack a, c, d = model.approx_objective_ineq_constraints
-        map!(view(x, size(p, 2)+1:size(p, 2)+length(c)), 1:length(c)) do i
+        map!(view(x, (size(p, 2) + 1):(size(p, 2) + length(c))), 1:length(c)) do i
             temp = c[i] - λ[i]
             if temp >= 0
                 return zero(T)

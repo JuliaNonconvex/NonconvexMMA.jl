@@ -9,21 +9,28 @@ import NonconvexCore: geteqconstraint, getineqconstraint, getobjective
 import NonconvexCore: getobjectiveconstraints, getdim, Solution
 import NonconvexCore: assess_convergence!, optimize!, Workspace
 
-using Reexport, Parameters, ChainRulesCore, ForwardDiff
+using Reexport, Parameters, ChainRulesCore, ForwardDiff, Zygote
 @reexport using NonconvexCore, Optim
 using NonconvexCore: optimize
 using NonconvexCore: @params, AbstractFunction, AbstractModel, VecModel
-using NonconvexCore: IneqConstraint, value_gradient, value_jacobian
+import NonconvexCore: IneqConstraint, value_gradient, value_jacobian
 using NonconvexCore: AbstractOptimizer, Solution, ConvergenceCriteria
 using NonconvexCore: ConvergenceState, hasconverged, debugging
 using NonconvexCore: getnvars, GenericResult, getinit
 
-"""
-    Solution(dualmodel, λ)
+# Approximation
+include("mma_approx.jl")
+include("xmma_approx.jl")
+include("mma_approx_docs.jl")
 
-Construct an empty solution for the dual model `dualmodel` given a sample dual solution `λ`.
-"""
-function Solution(dualmodel, λ)
+# Models
+include("mma_model.jl")
+include("dual_model.jl")
+
+# Typed Solution constructor for the dual model (defined here so the
+# MMAApproxModel type is in scope; the typed signature avoids extending
+# NonconvexCore.Solution with untyped (broadly pirated) arguments).
+function Solution(dualmodel::MMADualModel, λ)
     prevx = copy(getxk(dualmodel))
     x = copy(prevx)
     λ = copy(λ)
@@ -37,15 +44,6 @@ function Solution(dualmodel, λ)
     convstate = ConvergenceState()
     return Solution(prevx, x, λ, prevf, f, ∇f, g, ∇g, convstate)
 end
-
-# Approximation
-include("mma_approx.jl")
-include("xmma_approx.jl")
-include("mma_approx_docs.jl")
-
-# Models
-include("mma_model.jl")
-include("dual_model.jl")
 
 # Algorithms
 include("mma_algorithm.jl")

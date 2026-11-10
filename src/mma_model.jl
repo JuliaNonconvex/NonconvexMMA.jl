@@ -35,7 +35,7 @@ end
 
 Constructs an MMA approximation of the model `parent` around the point `x`. If `extended` is true, an [`XMMAApprox`](@ref) approximation is used. Otherwise, the default [`MMAApprox`](@ref) approximation is used. `kwargs` can be used to pass additional options to `XMMAApprox`, e.g. setting the coefficients.
 """
-function MMAApproxModel(parent::VecModel, x::AbstractVector; extended = false, kwargs...)
+function MMAApproxModel(parent::VecModel, x::AbstractVector; extended=false, kwargs...)
     T = eltype(x)
     σ = map(1:length(x)) do j
         diff = getmax(parent, j) - getmin(parent, j)
@@ -46,7 +46,7 @@ function MMAApproxModel(parent::VecModel, x::AbstractVector; extended = false, k
     end
     ρ = zeros(length(getineqconstraints(parent)) + 1)
     obj_constr = getobjectiveconstraints(parent)
-    approx_obj_constr = MMAApprox(obj_constr, x; σ = σ, ρ = ρ)
+    approx_obj_constr = MMAApprox(obj_constr, x; σ=σ, ρ=ρ)
     model = MMAApproxModel(
         parent,
         obj_constr,
