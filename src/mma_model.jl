@@ -46,7 +46,7 @@ function MMAApproxModel(parent::VecModel, x::AbstractVector; extended=false, kwa
     end
     ρ = zeros(length(getineqconstraints(parent)) + 1)
     obj_constr = getobjectiveconstraints(parent)
-    approx_obj_constr = MMAApprox(obj_constr, x; σ=σ, ρ=ρ)
+    approx_obj_constr::MMAApprox = MMAApprox(obj_constr, x; σ=σ, ρ=ρ)
     model = MMAApproxModel(
         parent,
         obj_constr,

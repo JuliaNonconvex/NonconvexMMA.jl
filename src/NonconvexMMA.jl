@@ -16,7 +16,7 @@ using NonconvexCore: @params, AbstractFunction, AbstractModel, VecModel
 import NonconvexCore: IneqConstraint, value_gradient, value_jacobian
 using NonconvexCore: AbstractOptimizer, Solution, ConvergenceCriteria
 using NonconvexCore: ConvergenceState, hasconverged, debugging
-using NonconvexCore: getnvars, GenericResult, getinit
+using NonconvexCore: getnvars, GenericResult, getinit, LazyPlottingCallback
 
 # Approximation
 include("mma_approx.jl")

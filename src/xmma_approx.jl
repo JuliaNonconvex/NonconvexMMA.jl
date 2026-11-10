@@ -39,7 +39,7 @@ end
 """
 ```
 XMMAApprox(
-    mma::MMAApprox,
+    mma::MMAApprox;
     a = fill(1.0, size(mma.p, 1)),
     c = fill(1.1, size(mma.p, 1) - 1),
     d = fill(1.0, size(mma.p, 1) - 1),
@@ -50,7 +50,7 @@ XMMAApprox(
 Constructs an instance of the extended MMA approximation `XMMAApprox` using the MMA approximation `mma` and coefficients `a`, `b` and `c`. See [`XMMAApprox`](@ref) for an explanation.
 """
 function XMMAApprox(
-    mma::MMAApprox,
+    mma::MMAApprox;
     a=fill(1.0, size(mma.p, 1)),
     c=fill(1.1, size(mma.p, 1) - 1),
     d=fill(1.0, size(mma.p, 1) - 1),

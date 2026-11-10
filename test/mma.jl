@@ -1,9 +1,9 @@
-using NonconvexMMA, LinearAlgebra, Test, Zygote
+@testitem "Simple constraints" begin
+    using NonconvexMMA, LinearAlgebra, Test, Zygote
 
-f(x::AbstractVector) = x[2] < 0 ? Inf : sqrt(x[2])
-g(x::AbstractVector, a, b) = (a * x[1] + b)^3 - x[2]
+    f(x::AbstractVector) = x[2] < 0 ? Inf : sqrt(x[2])
+    g(x::AbstractVector, a, b) = (a * x[1] + b)^3 - x[2]
 
-@testset "Simple constraints" begin
     m = Model(f)
     addvar!(m, [0.0, 0.0], [10.0, 10.0])
     add_ineq_constraint!(m, x -> g(x, 2, 0))
@@ -19,7 +19,12 @@ g(x::AbstractVector, a, b) = (a * x[1] + b)^3 - x[2]
     end
 end
 
-@testset "Block constraints" begin
+@testitem "Block constraints" begin
+    using NonconvexMMA, LinearAlgebra, Test, Zygote
+
+    f(x::AbstractVector) = x[2] < 0 ? Inf : sqrt(x[2])
+    g(x::AbstractVector, a, b) = (a * x[1] + b)^3 - x[2]
+
     m = Model(f)
     addvar!(m, [0.0, 0.0], [10.0, 10.0])
     add_ineq_constraint!(m, FunctionWrapper(x -> [g(x, 2, 0), g(x, -1, 1)], 2))
@@ -34,7 +39,12 @@ end
     end
 end
 
-@testset "Infinite bounds" begin
+@testitem "Infinite bounds" begin
+    using NonconvexMMA, LinearAlgebra, Test, Zygote
+
+    f(x::AbstractVector) = x[2] < 0 ? Inf : sqrt(x[2])
+    g(x::AbstractVector, a, b) = (a * x[1] + b)^3 - x[2]
+
     @testset "Infinite upper bound" begin
         m = Model(f)
         addvar!(m, [0.0, 0.0], [Inf, Inf])
@@ -91,7 +101,12 @@ end
 # Extended formulation
 # Not great for non-convex problems so we need to start pretty close
 # The problem is that an optimum solution to the extended formulation may not be feasible in the original formulation. This could be a local optimum or just due to a subspace of possible optimal solutions along a subspace.
-@testset "Extended formulation" begin
+@testitem "Extended formulation" begin
+    using NonconvexMMA, LinearAlgebra, Test, Zygote
+
+    f(x::AbstractVector) = x[2] < 0 ? Inf : sqrt(x[2])
+    g(x::AbstractVector, a, b) = (a * x[1] + b)^3 - x[2]
+
     m = Model(f)
     addvar!(m, [0.0, 0.0], [10.0, 10.0])
     add_ineq_constraint!(m, x -> g(x, 2, 0))
@@ -105,7 +120,12 @@ end
     end
 end
 
-@testset "auto_scale reports the correct objective value" begin
+@testitem "auto_scale reports the correct objective value" begin
+    using NonconvexMMA, LinearAlgebra, Test, Zygote
+
+    f(x::AbstractVector) = x[2] < 0 ? Inf : sqrt(x[2])
+    g(x::AbstractVector, a, b) = (a * x[1] + b)^3 - x[2]
+
     m = Model(f)
     addvar!(m, [0.0, 0.0], [10.0, 10.0])
     add_ineq_constraint!(m, x -> g(x, 2, 0))
@@ -118,7 +138,9 @@ end
     @test norm(r.minimizer - [1 / 3, 8 / 27]) < 1e-6
 end
 
-@testset "reset! works" begin
+@testitem "reset! works" begin
+    using NonconvexMMA, LinearAlgebra, Test, Zygote
+
     m = Model(x -> (x[1] - 1)^2 + (x[2] + 2)^2)
     addvar!(m, [-5.0, -5.0], [5.0, 5.0])
     vm, x0, _ = NonconvexCore.tovecmodel(m)
@@ -128,7 +150,9 @@ end
     @test norm(r.minimizer - [1.0, -2.0]) < 0.1
 end
 
-@testset "Fixed variables do not crash" begin
+@testitem "Fixed variables do not crash" begin
+    using NonconvexMMA, LinearAlgebra, Test, Zygote
+
     m = Model(x -> (x[1] - 2)^2 + (x[2] - 3)^2)
     addvar!(m, [2.0, 3.0], [2.0, 3.0])
     r = NonconvexMMA.optimize(m, MMA87(), [2.0, 3.0], options=MMAOptions(verbose=false))
@@ -136,14 +160,18 @@ end
     @test norm(r.minimizer - [2.0, 3.0]) < 1e-6
 end
 
-@testset "optimize without x0" begin
+@testitem "optimize without x0" begin
+    using NonconvexMMA, LinearAlgebra, Test, Zygote
+
     m = Model(x -> (x[1] - 1)^2 + (x[2] + 2)^2)
     addvar!(m, [0.0, -3.0], [2.0, -1.0])
     r = NonconvexMMA.optimize(m, MMA87(), options=MMAOptions(verbose=false))
     @test norm(r.minimizer - [1.0, -2.0]) < 1e-2
 end
 
-@testset "scalar MMAApprox getsigma" begin
+@testitem "scalar MMAApprox getsigma" begin
+    using NonconvexMMA, LinearAlgebra, Test, Zygote
+
     approx = NonconvexMMA.MMAApprox(FunctionWrapper(x -> x[1]^2 + x[2]^2, 1), [1.0, 2.0])
     σ = NonconvexMMA.getσ(approx)
     @test σ isa AbstractVector

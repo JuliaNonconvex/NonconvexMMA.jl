@@ -1,18 +1,18 @@
-using NonconvexMMA, LinearAlgebra, Test, Zygote, FiniteDifferences
-const FDM = FiniteDifferences
+@testitem "Gradient and hessian of MMA approximation" begin
+    using NonconvexMMA, LinearAlgebra, Test, Zygote, FiniteDifferences, Random
+    const FDM = FiniteDifferences
 
-f(x::AbstractVector) = sqrt(x[2])
-g(x::AbstractVector, a, b) = (a * x[1] + b)^3 - x[2]
+    f(x::AbstractVector) = sqrt(x[2])
+    g(x::AbstractVector, a, b) = (a * x[1] + b)^3 - x[2]
 
-_m = Model(f)
-addvar!(_m, [0.0, 0.0], [10.0, 10.0])
-add_ineq_constraint!(_m, x -> g(x, 2, 0))
-add_ineq_constraint!(_m, x -> g(x, -1, 1))
-m = NonconvexCore.tovecmodel(_m)[1]
+    _m = Model(f)
+    addvar!(_m, [0.0, 0.0], [10.0, 10.0])
+    add_ineq_constraint!(_m, x -> g(x, 2, 0))
+    add_ineq_constraint!(_m, x -> g(x, -1, 1))
+    m = NonconvexCore.tovecmodel(_m)[1]
 
-x = fill(0.5, 2)
+    x = fill(0.5, 2)
 
-@testset "Gradient and hessian of MMA approximation" begin
     exactf = NonconvexMMA.getobjective(m)
     approxf = NonconvexMMA.MMAApprox(exactf, x)
     val1, grad1 = NonconvexCore.value_gradient(exactf, x)
@@ -70,7 +70,22 @@ x = fill(0.5, 2)
     @test val1 ≈ val2 ≈ val3 ≈ val4
     @test jac1 ≈ jac2 ≈ jac3 ≈ jac4 ≈ jac5
 end
-@testset "Jacobian of MMA approximation" begin
+
+@testitem "Jacobian of MMA approximation" begin
+    using NonconvexMMA, LinearAlgebra, Test, Zygote, FiniteDifferences, Random
+    const FDM = FiniteDifferences
+
+    f(x::AbstractVector) = sqrt(x[2])
+    g(x::AbstractVector, a, b) = (a * x[1] + b)^3 - x[2]
+
+    _m = Model(f)
+    addvar!(_m, [0.0, 0.0], [10.0, 10.0])
+    add_ineq_constraint!(_m, x -> g(x, 2, 0))
+    add_ineq_constraint!(_m, x -> g(x, -1, 1))
+    m = NonconvexCore.tovecmodel(_m)[1]
+
+    x = fill(0.5, 2)
+
     approx = NonconvexMMA.MMAApproxModel(m, x)
     exactfs = approx.objective_ineq_constraints
     approxfs = approx.approx_objective_ineq_constraints
@@ -82,7 +97,21 @@ end
     @test jac1 ≈ jac2
 end
 
-@testset "Dual objective" begin
+@testitem "Dual objective" begin
+    using NonconvexMMA, LinearAlgebra, Test, Zygote, FiniteDifferences, Random
+    const FDM = FiniteDifferences
+
+    f(x::AbstractVector) = sqrt(x[2])
+    g(x::AbstractVector, a, b) = (a * x[1] + b)^3 - x[2]
+
+    _m = Model(f)
+    addvar!(_m, [0.0, 0.0], [10.0, 10.0])
+    add_ineq_constraint!(_m, x -> g(x, 2, 0))
+    add_ineq_constraint!(_m, x -> g(x, -1, 1))
+    m = NonconvexCore.tovecmodel(_m)[1]
+
+    x = fill(0.5, 2)
+
     approx = NonconvexMMA.MMAApproxModel(m, x)
     dualmodel = NonconvexMMA.MMADualModel(approx)
     dualobj = dualmodel.obj

@@ -1,6 +1,6 @@
-using NonconvexMMA, Test
+@testitem "solver capabilities" begin
+    using NonconvexMMA, Test
 
-@testset "solver capabilities" begin
     for alg in (MMA02(), MMA87())
         caps = solver_capabilities(alg)
         @test caps isa ConstraintCapabilities
