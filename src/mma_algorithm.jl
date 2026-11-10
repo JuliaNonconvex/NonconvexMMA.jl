@@ -74,13 +74,13 @@ A struct that stores all the options of the MMA algorithms. Th following are the
  - `maxiter`: the maximum number of inner iterations. For `MMA87`, there is 1 inner iteration per outer iteration.
  - `outer_maxiter`: the maximum number of outer iterations.
  - `maxinner`: the maximum number of inner iterations per outer iteration of [`MMA02`](@ref). Not applicable for [`MMA87`](@ref).
- - `tol`: a tolerance struct of type [`Tolerance`](@ref).
+ - `tol`: a tolerance struct of type `Tolerance`.
  - `s_init`: defined in the original [`MMA02`](@ref) paper.
  - `s_incr`: defined in the original [`MMA02`](@ref) paper.
  - `s_decr`: defined in the original [`MMA02`](@ref) paper.
  - `store_trace`: if true, a trace will be stored.
  - `dual_options`: the options passed to the dual optimizer from [`Optim.jl`](https://github.com/JuliaNLSolvers/Optim.jl).
- - `convcriteria`: an instance of [`ConvergenceCriteria`](@ref) that specifies the convergence criteria of the MMA algorithm.
+ - `convcriteria`: an instance of `ConvergenceCriteria` that specifies the convergence criteria of the MMA algorithm.
  - `verbose`: true/false, when true prints convergence statistics.
 """
 @with_kw mutable struct MMAOptions{
@@ -123,13 +123,13 @@ A struct that stores all the intermediate states and memory allocations needed f
  - `model`: the original instance of [`MMAApproxModel`](@ref) being optimized.
  - `dualmodel`: an instance of [`MMADualObj`](@ref) which resembles the dual of the MMA approximation of the original model.
  - `x0`: the initial primal solution.
- - `solution`: an instance of [`Solution`](@ref) that resembles the current solution in the optimization algorithm.
+ - `solution`: an instance of `Solution` that resembles the current solution in the optimization algorithm.
  - `σ`: the workspace move limit, explained in [`MMAApprox`](@ref).
  - `ρ`: the `ρ` parameter as explained in [`MMAApprox`](@ref).
  - `tempx`: a temporary vector used to store the 2nd previous primal solution.
  - `options`: an instance of [`MMAOptions`](@ref) that resembles the options of the MMA algorithm.
  - `callback`: a function that is called on `solution` in every iteration of the algorithm. This can be used to store information about the optimization process.
- - `optimizer`: an instance of [`AbstractOptimizer`](@ref) such as `MMA87()` or `MMA02()` that specifies the variant of MMA used to optimize the model.
+ - `optimizer`: an instance of `AbstractOptimizer` such as `MMA87()` or `MMA02()` that specifies the variant of MMA used to optimize the model.
  - `suboptimizer`: the dual optimization algorithm used to optimize the barrier problem. This should be an [`Optim.jl`](https://github.com/JuliaNLSolvers/Optim.jl) optimizer.
  - `tracing`: a Boolean that when true stores the trace of solutions evaluated during the optimization process.
  - `outer_iter`: the current outer iteration index. [`MMA87`](@ref) has 1 inner iteration per outer iteration. [`MMA02`](@ref) does multiple inner iterations per outer iteration.

@@ -65,7 +65,7 @@ function MMAApprox(f::AbstractFunction, x::AbstractVector; kwargs...)
     v = f(x)
     if v isa Number
         val, grad = value_gradient(f, x)
-        return MMAApprox(f, x, val, copy(grad'); kwargs...)
+        return MMAApprox(f, x, val, vec(grad); kwargs...)
     else
         val, jac = value_jacobian(f, x)
         return MMAApprox(f, x, val, jac; kwargs...)
@@ -80,7 +80,7 @@ function MMAApprox(f::AbstractFunction, x::AbstractVector, nt::NamedTuple)
     v = f(x)
     if v isa Number
         val, grad = value_gradient(f, x)
-        return MMAApprox(f, x, val, copy(grad'); σ=σ, ρ=ρ)
+        return MMAApprox(f, x, val, vec(grad); σ=σ, ρ=ρ)
     else
         val, jac = value_jacobian(f, x)
         return MMAApprox(f, x, val, jac; σ=σ, ρ=ρ)
