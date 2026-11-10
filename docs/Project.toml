@@ -1,5 +1,4 @@
 [deps]
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 DocumenterFragments = "862d714e-9826-4bb1-afc7-f2d363bba08c"
-NonconvexCore = "035190e5-69f1-488f-aaab-becca2889735"
 NonconvexMMA = "d3d89cbb-4ecd-4604-818d-8d1ff343e4da"
