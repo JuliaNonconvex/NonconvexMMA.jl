@@ -2,9 +2,6 @@
   <img src="assets/logo.png" width="400" alt="NonconvexMMA.jl logo">
 </p>
 
-# NonconvexMMA
-
-
 [![Documentation (stable)](https://img.shields.io/badge/docs-stable-blue.svg)](https://julianonconvex.github.io/NonconvexMMA.jl/stable)
 [![Documentation (dev)](https://img.shields.io/badge/docs-dev-blue.svg)](https://julianonconvex.github.io/NonconvexMMA.jl/dev)
 [![Build Status](https://github.com/JuliaNonconvex/NonconvexMMA.jl/actions/workflows/CI.yml/badge.svg?branch=master)](https://github.com/JuliaNonconvex/NonconvexMMA.jl/actions)
@@ -13,14 +10,31 @@
 [![Code Style: Blue](https://img.shields.io/badge/code%20style-Blue-4473c9.svg)](https://github.com/invenia/BlueStyle)
 [![JET](https://img.shields.io/badge/%F0%9F%9B%A9%EF%B8%8F_tested_with-JET.jl-233f9a)](https://github.com/aviatesk/JET.jl)
 
-## Algorithms
+# NonconvexMMA.jl
 
-- `MMA` / `MMA87`: the original method of moving asymptotes from the
-  [1987 paper](https://onlinelibrary.wiley.com/doi/abs/10.1002/nme.1620240207).
-  It builds a first-order convex separable approximation and is fast in
-  practice, but is not globally convergent.
-- `MMA02` / `GCMMA`: the globally convergent MMA (GCMMA) from the
-  [2002 paper](https://epubs.siam.org/doi/abs/10.1137/S1052623499362822).
-  It runs inner iterations that increase the lift parameter `rho` until the
-  approximation upper-bounds the original functions, which provides the global
-  convergence guarantee. `GCMMA` is an alias of `MMA02`.
+Method of moving asymptotes
+
+The 1987 MMA and the 2002 globally convergent GCMMA for inequality-constrained problems.
+
+NonconvexMMA.jl is part of the [JuliaNonconvex](https://github.com/JuliaNonconvex) ecosystem built on [NonconvexCore.jl](https://github.com/JuliaNonconvex/NonconvexCore.jl).
+
+## Quick start
+
+```julia
+using NonconvexMMA
+
+alg = MMA87() # or MMA02()
+options = MMAOptions()
+result = optimize(model, alg, x0, options = options, convcriteria = KKTCriteria())
+```
+
+## Documentation
+
+The full documentation is available at [https://julianonconvex.github.io/NonconvexMMA.jl/stable](https://julianonconvex.github.io/NonconvexMMA.jl/stable) (stable) and [https://julianonconvex.github.io/NonconvexMMA.jl/dev](https://julianonconvex.github.io/NonconvexMMA.jl/dev) (development).
+
+## Installation
+
+```julia
+using Pkg
+Pkg.add("NonconvexMMA")
+```
