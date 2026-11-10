@@ -9,14 +9,14 @@ abstract type AbstractMMAApprox <: AbstractFunction end
 function value_gradient(
     a::AbstractMMAApprox,
     x::AbstractVector,
-    backend::ADTypes.AbstractADType = NonconvexCore.DEFAULT_AD_BACKEND[],
+    backend::ADTypes.AbstractADType=NonconvexCore.DEFAULT_AD_BACKEND[],
 )
     return a(x), Zygote.gradient(a, x)[1]
 end
 function value_jacobian(
     a::AbstractMMAApprox,
     x::AbstractVector,
-    backend::ADTypes.AbstractADType = NonconvexCore.DEFAULT_AD_BACKEND[],
+    backend::ADTypes.AbstractADType=NonconvexCore.DEFAULT_AD_BACKEND[],
 )
     y = a(x)
     J = reduce(vcat, [Zygote.gradient(z -> a(z)[i], x)[1]' for i in eachindex(y)])
