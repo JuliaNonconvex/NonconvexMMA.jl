@@ -1,5 +1,7 @@
 # Method of moving asymptotes in pure Julia
 
+![JuliaNonconvex logo](https://raw.githubusercontent.com/JuliaNonconvex/NonconvexMMA.jl/master/docs/src/assets/logo.png)
+
 ## Description
 
 There are 2 versions of the method of moving asymptotes (MMA) that are available in `NonconvexMMA.jl`:
