@@ -50,7 +50,7 @@ function MMAApproxModel(parent::VecModel, x::AbstractVector; extended=false, kwa
     model = MMAApproxModel(
         parent,
         obj_constr,
-        extended ? XMMAApprox(approx_obj_constr; kwargs...) : approx_obj_constr,
+        extended ? _xmma_approx_nt(approx_obj_constr, (; kwargs...)) : approx_obj_constr,
         copy(getmin(parent)),
         copy(getmax(parent)),
     )

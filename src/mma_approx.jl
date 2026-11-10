@@ -71,6 +71,21 @@ function MMAApprox(f::AbstractFunction, x::AbstractVector; kwargs...)
         return MMAApprox(f, x, val, jac; kwargs...)
     end
 end
+# A positional-NamedTuple path: JET (on Julia 1.13) cannot resolve
+# `Core.kwcall` on the keyword constructors during its virtual top-level
+# replay, so forwarded options go through this positional method.
+function MMAApprox(f::AbstractFunction, x::AbstractVector, nt::NamedTuple)
+    σ = get(nt, :σ, fill(10.0, length(x)))
+    ρ = get(nt, :ρ, 0.0)
+    v = f(x)
+    if v isa Number
+        val, grad = value_gradient(f, x)
+        return MMAApprox(f, x, val, copy(grad'); σ=σ, ρ=ρ)
+    else
+        val, jac = value_jacobian(f, x)
+        return MMAApprox(f, x, val, jac; σ=σ, ρ=ρ)
+    end
+end
 function MMAApprox(
     parent::AbstractFunction,
     x::AbstractVector,
@@ -117,6 +132,9 @@ function MMAApprox(
     updateapprox!(approx, x, f, ∇f)
     return approx
 end
+
+getparent(approx::MMAApprox) = approx.parent
+getdim(approx::MMAApprox) = getdim(getparent(approx))
 
 """
     (f::MMAApprox)(x::AbstractVector)
@@ -237,9 +255,6 @@ function set∇fk!(approx::MMAApprox, ∇f::AbstractVecOrMat)
     approx.∇fk .= ∇f
     return approx
 end
-
-getparent(approx::MMAApprox) = approx.parent
-getdim(approx::MMAApprox) = getdim(getparent(approx))
 
 function updateapprox!(approx::MMAApprox{<:Base.RefValue{<:Real}}, x::AbstractVector)
     val, grad = value_gradient(getparent(approx), x)
