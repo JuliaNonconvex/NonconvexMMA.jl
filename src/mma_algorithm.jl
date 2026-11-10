@@ -120,8 +120,8 @@ end
     MMAWorkspace
 
 A struct that stores all the intermediate states and memory allocations needed for the optimization. The following are the fields of the struct:
- - `model`: the original instance of [`MMAModel`](@ref) being optimized.
- - `dualmodel`: an instance of [`DualMMAModel`](@ref) which resembles the dual of the MMA approximation of the original model.
+ - `model`: the original instance of [`MMAApproxModel`](@ref) being optimized.
+ - `dualmodel`: an instance of [`MMADualObj`](@ref) which resembles the dual of the MMA approximation of the original model.
  - `x0`: the initial primal solution.
  - `solution`: an instance of [`Solution`](@ref) that resembles the current solution in the optimization algorithm.
  - `σ`: the workspace move limit, explained in [`MMAApprox`](@ref).
