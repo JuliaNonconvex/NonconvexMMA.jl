@@ -6,6 +6,11 @@ on:
     tags:
       - 'v*'
   pull_request:
+
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   test:
     name: Julia ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.arch }} - ${{ github.event_name }}
