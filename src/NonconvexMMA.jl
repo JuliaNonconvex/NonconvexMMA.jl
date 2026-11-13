@@ -7,7 +7,7 @@ import NonconvexCore: get_objective_multiple, set_objective_multiple!
 import NonconvexCore: geteqconstraints, getineqconstraints, NoCallback
 import NonconvexCore: geteqconstraint, getineqconstraint, getobjective
 import NonconvexCore: getobjectiveconstraints, getdim, Solution
-import NonconvexCore: assess_convergence!, optimize!, Workspace
+import NonconvexCore: assess_convergence!, optimize!, Workspace, reset!
 
 using Reexport, Parameters, ChainRulesCore, ForwardDiff, Zygote
 @reexport using NonconvexCore, Optim

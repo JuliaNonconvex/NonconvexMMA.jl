@@ -179,3 +179,77 @@ end
     NonconvexMMA.setσ!(approx, 0.5)
     @test all(==(0.5), NonconvexMMA.getσ(approx))
 end
+
+@testitem "MMAApproxModel rejects unknown keyword arguments" begin
+    using NonconvexMMA, LinearAlgebra, Test
+
+    m = Model(x -> (x[1] - 1)^2 + (x[2] + 2)^2)
+    addvar!(m, [-5.0, -5.0], [5.0, 5.0])
+    parent = NonconvexCore.tovecmodel(m)[1]
+    x = [0.5, -1.5]
+
+    # Unknown keyword arguments must not be silently absorbed
+    @test_throws ArgumentError NonconvexMMA.MMAApproxModel(
+        parent, x; extended=false, nonsense=1
+    )
+    @test_throws ArgumentError NonconvexMMA.MMAApproxModel(
+        parent, x; extended=true, nonsense=1
+    )
+    @test_throws ArgumentError NonconvexMMA.MMAApproxModel(parent, x; exended=true)
+    # XMMA-only coefficients are unused with extended=false
+    @test_throws ArgumentError NonconvexMMA.MMAApproxModel(parent, x; a=fill(1.0, 1))
+
+    # Accepted keyword arguments do not throw and are forwarded
+    model = NonconvexMMA.MMAApproxModel(parent, x; extended=false, σ=fill(0.5, 2))
+    @test NonconvexMMA.getσ(model) == fill(0.5, 2)
+    model = NonconvexMMA.MMAApproxModel(parent, x; extended=true, a=fill(2.0, 1))
+    @test model.approx_objective_ineq_constraints isa NonconvexMMA.XMMAApprox
+end
+
+@testitem "XMMAApprox rejects scalar-valued MMAApprox" begin
+    using NonconvexMMA, LinearAlgebra, Test
+
+    m = Model(x -> x[1]^2 + x[2]^2)
+    addvar!(m, [-5.0, -5.0], [5.0, 5.0])
+    parent = NonconvexCore.tovecmodel(m)[1]
+    obj = NonconvexMMA.getobjective(parent)
+    scalar_mma = NonconvexMMA.MMAApprox(obj, [0.5, 0.5])
+    @test NonconvexMMA.getfk(scalar_mma) isa Real
+    @test_throws ArgumentError NonconvexMMA.XMMAApprox(scalar_mma)
+    @test_throws ArgumentError NonconvexMMA.XMMAApprox(scalar_mma, (;))
+end
+
+@testitem "store_trace records the solution history" begin
+    using NonconvexMMA, LinearAlgebra, Test
+
+    m = Model(x -> (x[1] - 1)^2 + (x[2] + 2)^2)
+    addvar!(m, [-5.0, -5.0], [5.0, 5.0])
+    vm, x0, _ = NonconvexCore.tovecmodel(m)
+    w = NonconvexMMA.MMAWorkspace(
+        vm, MMA87(), x0; options=MMAOptions(verbose=false, store_trace=true)
+    )
+    r = NonconvexCore.optimize!(w)
+    @test isfinite(r.minimum)
+    @test !isempty(w.trace.tr)
+    @test all(entry -> entry.x isa AbstractVector, w.trace.tr)
+    # reset! starts a fresh trace
+    NonconvexCore.reset!(w, [0.5, -1.5])
+    @test isempty(w.trace.tr)
+    NonconvexCore.optimize!(w)
+    @test !isempty(w.trace.tr)
+end
+
+@testitem "maxiter_reached reflects the outer_maxiter exit" begin
+    using NonconvexMMA, LinearAlgebra, Test
+
+    m = Model(x -> (x[1] - 1)^2 + (x[2] + 2)^2)
+    addvar!(m, [-5.0, -5.0], [5.0, 5.0])
+    options = MMAOptions(;
+        verbose=false,
+        maxiter=1000,
+        outer_maxiter=1,
+        tol=Tolerance(f=1e-15, kkt=1e-15),
+    )
+    r = NonconvexMMA.optimize(m, MMA87(), [0.5, -1.5], options=options)
+    @test r.maxiter_reached
+end

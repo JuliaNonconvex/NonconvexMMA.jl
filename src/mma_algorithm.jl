@@ -209,6 +209,8 @@ function reset!(w::MMAWorkspace, x0=nothing)
     @unpack solution = w
     outer_iter, iter, fcalls = 0, 0, 0
     @pack! w = fcalls, iter, outer_iter
+    # A fresh optimization run should start from an empty trace
+    empty!(w.trace.tr)
     if x0 !== nothing
         w.x0 .= x0
         w.tempx .= solution.prevx
@@ -270,6 +272,9 @@ function optimize!(workspace::MMAWorkspace)
 
     # Callback, e.g. a trace plotting callback
     callback(solution)
+
+    # Record the initial solution in the trace
+    options.store_trace && push!(trace.tr, deepcopy(solution))
 
     # Initialize the workspace's trust region σ
     initializeσ!(workspace)
@@ -357,6 +362,9 @@ function optimize!(workspace::MMAWorkspace)
         end
         @pack! workspace = outer_iter, iter, fcalls
 
+        # Record the solution in the trace after each outer iteration
+        options.store_trace && push!(trace.tr, deepcopy(solution))
+
         if options.keep_best
             best_solution = get_best_solution(solution, best_solution, options)
         else
@@ -381,7 +389,7 @@ function optimize!(workspace::MMAWorkspace)
         best_solution.x,
         best_solution.f,
         iter,
-        iter == options.maxiter,
+        iter == options.maxiter || outer_iter == options.outer_maxiter,
         options.tol,
         best_solution.convstate,
         fcalls,

@@ -33,10 +33,18 @@ end
 """
     MMAApproxModel(parent::VecModel, x::AbstractVector; extended = false, kwargs...)
 
-Constructs an MMA approximation of the model `parent` around the point `x`. If `extended` is true, an [`XMMAApprox`](@ref) approximation is used. Otherwise, the default [`MMAApprox`](@ref) approximation is used. `kwargs` can be used to pass additional options to `XMMAApprox`, e.g. setting the coefficients.
+Constructs an MMA approximation of the model `parent` around the point `x`. If `extended` is true, an [`XMMAApprox`](@ref) approximation is used. Otherwise, the default [`MMAApprox`](@ref) approximation is used. `kwargs` can be used to pass additional options to the approximation: `σ` and `ρ` for [`MMAApprox`](@ref), and `a`, `c` and `d` (as well as `σ` and `ρ`) for [`XMMAApprox`](@ref), e.g. setting the coefficients. An `ArgumentError` is thrown for any other keyword argument.
 """
 function MMAApproxModel(parent::VecModel, x::AbstractVector; extended=false, kwargs...)
     T = eltype(x)
+    nt = (; kwargs...)
+    if extended
+        _check_approx_kwargs(
+            nt, (:σ, :ρ, :a, :c, :d), "MMAApproxModel (extended=true)"
+        )
+    else
+        _check_approx_kwargs(nt, (:σ, :ρ), "MMAApproxModel (extended=false)")
+    end
     σ = map(1:length(x)) do j
         diff = getmax(parent, j) - getmin(parent, j)
         if !isfinite(diff)
@@ -45,17 +53,38 @@ function MMAApproxModel(parent::VecModel, x::AbstractVector; extended=false, kwa
         return 0.5 * diff
     end
     ρ = zeros(length(getineqconstraints(parent)) + 1)
+    # Let explicit σ and ρ keyword arguments override the computed defaults.
+    σ = get(nt, :σ, σ)
+    ρ = get(nt, :ρ, ρ)
     obj_constr = getobjectiveconstraints(parent)
     approx_obj_constr::MMAApprox = MMAApprox(obj_constr, x; σ=σ, ρ=ρ)
     model = MMAApproxModel(
         parent,
         obj_constr,
-        extended ? _xmma_approx_nt(approx_obj_constr, (; kwargs...)) : approx_obj_constr,
+        extended ? _xmma_approx_nt(approx_obj_constr, nt) : approx_obj_constr,
         copy(getmin(parent)),
         copy(getmax(parent)),
     )
     updateapprox!(model)
     return model
+end
+
+"""
+    _check_approx_kwargs(nt::NamedTuple, accepted::Tuple, context::String)
+
+Throws an `ArgumentError` when `nt` contains keyword arguments outside the `accepted` set.
+"""
+function _check_approx_kwargs(nt::NamedTuple, accepted::Tuple, context::String)
+    unknown = setdiff(collect(keys(nt)), collect(accepted))
+    if !isempty(unknown)
+        throw(
+            ArgumentError(
+                "$context got unknown keyword argument(s) $unknown. " *
+                "Accepted keywords are: $(join(string.(accepted), ", ")).",
+            ),
+        )
+    end
+    return nothing
 end
 
 getmin(m::MMAApproxModel) = m.box_min
