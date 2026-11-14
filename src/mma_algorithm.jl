@@ -12,6 +12,12 @@ function MMA87(; dualoptimizer=Optim.GradientDescent())
     return MMA87(dualoptimizer)
 end
 
+"""
+    MMA
+
+Alias for [`MMA87`](@ref): the original method of moving asymptotes (MMA)
+from the [1987 paper](https://onlinelibrary.wiley.com/doi/abs/10.1002/nme.1620240207).
+"""
 const MMA = MMA87
 
 function NonconvexCore.solver_capabilities(::MMA87)
@@ -70,7 +76,7 @@ The globally convergent method of moving asymptotes (GCMMA) from the
 """
     MMAOptions
 
-A struct that stores all the options of the MMA algorithms. Th following are the fields of `MMAOptions`:
+A struct that stores all the options of the MMA algorithms. The following are the fields of `MMAOptions`:
  - `maxiter`: the maximum number of inner iterations. For `MMA87`, there is 1 inner iteration per outer iteration.
  - `outer_maxiter`: the maximum number of outer iterations.
  - `maxinner`: the maximum number of inner iterations per outer iteration of [`MMA02`](@ref). Not applicable for [`MMA87`](@ref).
