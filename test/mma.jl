@@ -138,6 +138,24 @@ end
     @test norm(r.minimizer - [1 / 3, 8 / 27]) < 1e-6
 end
 
+@testitem "auto_scale on unconstrained models keeps the objective" begin
+    using NonconvexMMA, LinearAlgebra, Test, Zygote
+
+    # Regression test: without constraints the objective/constraint norm
+    # ratios are empty (norm 0), and scaleobjective! used to scale the
+    # objective by 0 — correctsolution! then divided by it and the reported
+    # minimum was NaN. The scaling must be a no-op for unconstrained models.
+    m = Model(x -> (x[1] - 1)^2 + (x[2] + 2)^2)
+    addvar!(m, [-5.0, -5.0], [5.0, 5.0])
+    options = MMAOptions(;
+        tol=Tolerance(kkt=1e-6, f=0.0), s_init=0.1, auto_scale=true, verbose=false
+    )
+    r = NonconvexMMA.optimize(m, MMA87(), [0.0, 0.0], options=options)
+    @test isfinite(r.minimum) # the old bug reported NaN (division by zero)
+    @test r.minimum < 0.05 # real descent happened (the old bug froze the solve)
+    @test norm(r.minimizer - [1.0, -2.0]) < 0.25
+end
+
 @testitem "reset! works" begin
     using NonconvexMMA, LinearAlgebra, Test, Zygote
 
