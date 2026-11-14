@@ -245,10 +245,7 @@ end
     m = Model(x -> (x[1] - 1)^2 + (x[2] + 2)^2)
     addvar!(m, [-5.0, -5.0], [5.0, 5.0])
     options = MMAOptions(;
-        verbose=false,
-        maxiter=1000,
-        outer_maxiter=1,
-        tol=Tolerance(f=1e-15, kkt=1e-15),
+        verbose=false, maxiter=1000, outer_maxiter=1, tol=Tolerance(f=1e-15, kkt=1e-15)
     )
     r = NonconvexMMA.optimize(m, MMA87(), [0.5, -1.5], options=options)
     @test r.maxiter_reached

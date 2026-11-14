@@ -39,9 +39,7 @@ function MMAApproxModel(parent::VecModel, x::AbstractVector; extended=false, kwa
     T = eltype(x)
     nt = (; kwargs...)
     if extended
-        _check_approx_kwargs(
-            nt, (:σ, :ρ, :a, :c, :d), "MMAApproxModel (extended=true)"
-        )
+        _check_approx_kwargs(nt, (:σ, :ρ, :a, :c, :d), "MMAApproxModel (extended=true)")
     else
         _check_approx_kwargs(nt, (:σ, :ρ), "MMAApproxModel (extended=false)")
     end
