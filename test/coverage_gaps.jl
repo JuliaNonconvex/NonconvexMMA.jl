@@ -13,7 +13,9 @@
     @testset "XMMA dual-optimal-x branches" begin
         # The extended (XMMA) dual model maps λ into the primal space through
         # the c[i] - λ[i] < 0 branch; a full solve exercises it.
-        r = NonconvexMMA.optimize(m, MMA02(), x0; extended=true, options=MMAOptions(maxiter=30))
+        r = NonconvexMMA.optimize(
+            m, MMA02(), x0; extended=true, options=MMAOptions(maxiter=30)
+        )
         @test isfinite(r.minimum)
     end
 
@@ -43,7 +45,12 @@
         # A problem that converges on the first iterations makes x == prevx,
         # hitting the σ[j] retention branch of updateσ!.
         r = NonconvexMMA.optimize(
-            m, MMA87(), x0; options=MMAOptions(maxiter=10, tol=Tolerance(x=1e-2, f=1e-2, kkt=1e-2, infeas=1e-2))
+            m,
+            MMA87(),
+            x0;
+            options=MMAOptions(
+                maxiter=10, tol=Tolerance(x=1e-2, f=1e-2, kkt=1e-2, infeas=1e-2)
+            ),
         )
         @test isfinite(r.minimum)
     end
