@@ -1,5 +1,12 @@
 # NEWS
 
+## 1.3.3
+
+- Fixed `auto_scale` destroying the objective on unconstrained models:
+  without constraints the objective/constraint norm ratios are empty and the
+  objective was scaled by zero (the reported minimum became NaN). The
+  scaling is now skipped in that case; added a regression test.
+
 ## 1.3.2
 
 - Validated the MMA kwargs and fixed trace and maxiter bookkeeping;
