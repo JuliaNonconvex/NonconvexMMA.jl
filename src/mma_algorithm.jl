@@ -406,12 +406,15 @@ end
 """
     scaleobjective!(model::VecModel, fg, ∇fg, approxfg, λ)
 
-Scales the objective of `model` using the ratio of the ∞ norms of the constraint and objective values and gradients. After scaling, the ∞ norms will be the same.
+Scales the objective of `model` using the ratio of the ∞ norms of the constraint and objective values and gradients. After scaling, the ∞ norms will be the same. For models without constraints (or with zero constraint norms) the ratio is 0 and the scaling is skipped, keeping the objective untouched.
 """
 function scaleobjective!(model::VecModel, fg, ∇fg, approxfg, λ)
     @views normratio = norm(∇fg[2:end, :], Inf) / norm(∇fg[1, :], Inf)
     @views normratio = max(normratio, norm(fg[2:end], Inf) / abs(fg[1]))
-    normratio = isfinite(normratio) ? normratio : one(normratio)
+    # Without constraints (or with zero constraint norms) `normratio` is 0:
+    # scaling by 0 would destroy the objective and `correctsolution!` would
+    # later divide by it. Skip the scaling in that case.
+    normratio = normratio > 0 && isfinite(normratio) ? normratio : one(normratio)
     set_objective_multiple!(model, get_objective_multiple(model) * normratio)
     fg[1] = fg[1] * normratio
     approxfg[1] = approxfg[1] * normratio
