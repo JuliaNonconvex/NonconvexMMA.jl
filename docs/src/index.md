@@ -1,4 +1,4 @@
-# Method of moving asymptotes in pure Julia
+# NonconvexMMA
 
 ```@raw html
 <p align="center">

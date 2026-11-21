@@ -1,4 +1,4 @@
-name = "MMA"
+name = "NonconvexMMA"
 modules = ["NonconvexMMA"]
 doctest_setup = "using NonconvexMMA"
 
