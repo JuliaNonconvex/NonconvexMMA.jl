@@ -1,4 +1,4 @@
-# Method of moving asymptotes in pure Julia
+# NonconvexMMA
 
 ![JuliaNonconvex logo](https://raw.githubusercontent.com/JuliaNonconvex/NonconvexMMA.jl/master/docs/src/assets/logo.png)
 
