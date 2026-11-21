@@ -288,8 +288,8 @@ function optimize!(workspace::MMAWorkspace)
     initializeρ!(workspace)
 
     while (!hasconverged(solution) || outer_iter == 0) &&
-              iter < maxiter &&
-              outer_iter < outer_maxiter
+          iter < maxiter &&
+          outer_iter < outer_maxiter
         outer_iter += 1
 
         # Adapt workspace's trust region σ using s_incr and s_decr
@@ -309,9 +309,9 @@ function optimize!(workspace::MMAWorkspace)
         upperbounded = false
         prev_iter = iter
         while (!hasconverged(solution) || outer_iter == 1) &&
-                  !upperbounded &&
-                  iter < maxiter &&
-                  iter < prev_iter + options.maxinner
+              !upperbounded &&
+              iter < maxiter &&
+              iter < prev_iter + options.maxinner
             iter += 1
             # Solve the dual problem by minimizing negative the dual objective value
             if length(λ) > 0
