@@ -1,5 +1,8 @@
 # NEWS
 
+## 1.3.4
+
+- Docs: package-name section titles and left-aligned logos (no code changes).
 ## 1.3.3
 
 - Fixed `auto_scale` destroying the objective on unconstrained models:
