@@ -12,6 +12,12 @@ function MMA87(; dualoptimizer=Optim.GradientDescent())
     return MMA87(dualoptimizer)
 end
 
+"""
+    MMA
+
+Alias for [`MMA87`](@ref): the original method of moving asymptotes (MMA)
+from the [1987 paper](https://onlinelibrary.wiley.com/doi/abs/10.1002/nme.1620240207).
+"""
 const MMA = MMA87
 
 function NonconvexCore.solver_capabilities(::MMA87)
@@ -70,7 +76,7 @@ The globally convergent method of moving asymptotes (GCMMA) from the
 """
     MMAOptions
 
-A struct that stores all the options of the MMA algorithms. Th following are the fields of `MMAOptions`:
+A struct that stores all the options of the MMA algorithms. The following are the fields of `MMAOptions`:
  - `maxiter`: the maximum number of inner iterations. For `MMA87`, there is 1 inner iteration per outer iteration.
  - `outer_maxiter`: the maximum number of outer iterations.
  - `maxinner`: the maximum number of inner iterations per outer iteration of [`MMA02`](@ref). Not applicable for [`MMA87`](@ref).
@@ -209,6 +215,8 @@ function reset!(w::MMAWorkspace, x0=nothing)
     @unpack solution = w
     outer_iter, iter, fcalls = 0, 0, 0
     @pack! w = fcalls, iter, outer_iter
+    # A fresh optimization run should start from an empty trace
+    empty!(w.trace.tr)
     if x0 !== nothing
         w.x0 .= x0
         w.tempx .= solution.prevx
@@ -270,6 +278,9 @@ function optimize!(workspace::MMAWorkspace)
 
     # Callback, e.g. a trace plotting callback
     callback(solution)
+
+    # Record the initial solution in the trace
+    options.store_trace && push!(trace.tr, deepcopy(solution))
 
     # Initialize the workspace's trust region σ
     initializeσ!(workspace)
@@ -353,6 +364,9 @@ function optimize!(workspace::MMAWorkspace)
         end
         @pack! workspace = outer_iter, iter, fcalls
 
+        # Record the solution in the trace after each outer iteration
+        options.store_trace && push!(trace.tr, deepcopy(solution))
+
         if options.keep_best
             best_solution = get_best_solution(solution, best_solution, options)
         else
@@ -377,7 +391,7 @@ function optimize!(workspace::MMAWorkspace)
         best_solution.x,
         best_solution.f,
         iter,
-        iter == options.maxiter,
+        iter == options.maxiter || outer_iter == options.outer_maxiter,
         options.tol,
         best_solution.convstate,
         fcalls,
@@ -388,12 +402,15 @@ end
 """
     scaleobjective!(model::VecModel, fg, ∇fg, approxfg, λ)
 
-Scales the objective of `model` using the ratio of the ∞ norms of the constraint and objective values and gradients. After scaling, the ∞ norms will be the same.
+Scales the objective of `model` using the ratio of the ∞ norms of the constraint and objective values and gradients. After scaling, the ∞ norms will be the same. For models without constraints (or with zero constraint norms) the ratio is 0 and the scaling is skipped, keeping the objective untouched.
 """
 function scaleobjective!(model::VecModel, fg, ∇fg, approxfg, λ)
     @views normratio = norm(∇fg[2:end, :], Inf) / norm(∇fg[1, :], Inf)
     @views normratio = max(normratio, norm(fg[2:end], Inf) / abs(fg[1]))
-    normratio = isfinite(normratio) ? normratio : one(normratio)
+    # Without constraints (or with zero constraint norms) `normratio` is 0:
+    # scaling by 0 would destroy the objective and `correctsolution!` would
+    # later divide by it. Skip the scaling in that case.
+    normratio = normratio > 0 && isfinite(normratio) ? normratio : one(normratio)
     set_objective_multiple!(model, get_objective_multiple(model) * normratio)
     fg[1] = fg[1] * normratio
     approxfg[1] = approxfg[1] * normratio

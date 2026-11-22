@@ -56,6 +56,15 @@ function XMMAApprox(
     d=fill(1.0, size(mma.p, 1) - 1),
     kwargs...,
 )
+    if !isempty(kwargs)
+        unknown = collect(keys(kwargs))
+        throw(
+            ArgumentError(
+                "XMMAApprox got unknown keyword argument(s) $unknown. " *
+                "Accepted keywords are: a, c, d.",
+            ),
+        )
+    end
     return _xmma_approx_nt(mma, (; a, c, d, kwargs...))
 end
 # A positional-NamedTuple path: JET (on Julia 1.13) cannot resolve
@@ -71,6 +80,16 @@ function _xmma_approx_nt(mma::MMAApprox, nt::NamedTuple)
     x0 = getxk(mma)
     T = eltype(x0)
     approxfg = mma(x0)
+    if !(approxfg isa AbstractVector)
+        throw(
+            ArgumentError(
+                "XMMAApprox requires a vector-valued MMAApprox whose output is " *
+                "[objective; constraint violations], but the given MMAApprox is " *
+                "scalar-valued. Wrap the objective and constraints in a single " *
+                "vector-valued function instead.",
+            ),
+        )
+    end
     z0 = sqrt(eps(T))
     y0 = max.(approxfg[2:end] .- a[2:end] .* z0, z0)
     out = similar(mma.out)

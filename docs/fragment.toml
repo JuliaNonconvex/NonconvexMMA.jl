@@ -1,10 +1,26 @@
-name = "MMA"
+name = "NonconvexMMA"
 modules = ["NonconvexMMA"]
 doctest_setup = "using NonconvexMMA"
 
 [[pages]]
-title = "MMA"
+title = "Introduction"
 file = "index.md"
+
+[[pages]]
+title = "Quick start"
+file = "quickstart.md"
+
+[[pages]]
+title = "Options"
+file = "options.md"
+
+[[pages]]
+title = "Solver capabilities"
+file = "capabilities.md"
+
+[[pages]]
+title = "Result"
+file = "result.md"
 
 [[pages]]
 title = "Docstrings"
