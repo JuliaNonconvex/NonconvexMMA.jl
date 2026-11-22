@@ -1,5 +1,9 @@
 # NEWS
 
+## 1.3.5
+
+- Remove the use of the `debugging` flag removed in NonconvexCore 2.3 (the
+  debug `@show` branch and the test toggling it are dropped).
 ## 1.3.4
 
 - Docs: package-name section titles and left-aligned logos (no code changes).
