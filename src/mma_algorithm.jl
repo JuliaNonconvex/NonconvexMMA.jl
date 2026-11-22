@@ -325,10 +325,6 @@ function optimize!(workspace::MMAWorkspace)
                     dual_options,
                 ).minimizer
             end
-            if debugging[]
-                @show λ
-            end
-
             # Revaluate the optimal primal solution at the optimal dual solution
             dualobj(λ)
 

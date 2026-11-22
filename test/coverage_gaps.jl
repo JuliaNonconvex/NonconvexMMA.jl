@@ -1,6 +1,6 @@
 @testitem "XMMA dual solve, plotting, keep-best and stalled iterates" begin
     using NonconvexMMA, NonconvexCore, LinearAlgebra, Test, Random
-    import NonconvexMMA: MMAApprox, MMAApproxModel, MMAWorkspace, debugging
+    import NonconvexMMA: MMAApprox, MMAApproxModel, MMAWorkspace
 
     f(x::AbstractVector) = sum(x .^ 2)
     g(x::AbstractVector) = [x[1]^2 - 0.5]
@@ -28,17 +28,11 @@
         @test isfinite(r.minimum)
     end
 
-    @testset "debugging flag and keep-best path" begin
-        old = debugging[]
-        debugging[] = true
-        try
-            r = NonconvexMMA.optimize(
-                m, MMA87(), x0; options=MMAOptions(keep_best=true, maxiter=5)
-            )
-            @test isfinite(r.minimum)
-        finally
-            debugging[] = old
-        end
+    @testset "keep-best path" begin
+        r = NonconvexMMA.optimize(
+            m, MMA87(), x0; options=MMAOptions(keep_best=true, maxiter=5)
+        )
+        @test isfinite(r.minimum)
     end
 
     @testset "stalled iterates keep the move limit" begin
