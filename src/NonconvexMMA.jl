@@ -15,7 +15,7 @@ using NonconvexCore: optimize
 using NonconvexCore: @params, AbstractFunction, AbstractModel, VecModel
 import NonconvexCore: IneqConstraint, value_gradient, value_jacobian
 using NonconvexCore: AbstractOptimizer, Solution, ConvergenceCriteria
-using NonconvexCore: ConvergenceState, hasconverged, debugging
+using NonconvexCore: ConvergenceState, hasconverged
 using NonconvexCore: getnvars, GenericResult, getinit, LazyPlottingCallback
 
 # Approximation
