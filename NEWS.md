@@ -1,5 +1,8 @@
 # NEWS
 
+## 1.3.6
+
+- Docs: the logo now appears only in the sidebar, not in the page body.
 ## 1.3.5
 
 - Remove the use of the `debugging` flag removed in NonconvexCore 2.3 (the
