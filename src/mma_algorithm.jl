@@ -272,7 +272,7 @@ function optimize!(workspace::MMAWorkspace)
     optimobj = getoptimobj(dualobj, false)
 
     # Lower and upper bounds on the dual variables
-    λl = zeros(ni) .+ 1e-10
+    λl = zeros(ni)
     λu = fill(Inf, ni)
     λ .= 1
 
