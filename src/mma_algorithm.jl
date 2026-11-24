@@ -324,6 +324,9 @@ function optimize!(workspace::MMAWorkspace)
                     Optim.Fminbox(dualoptimizer),
                     dual_options,
                 ).minimizer
+                # Fminbox can return minimizers a hair outside its own
+                # bounds; clip so the next call's initial point is valid.
+                λ .= min.(max.(λ, λl), λu)
             end
             # Revaluate the optimal primal solution at the optimal dual solution
             dualobj(λ)
