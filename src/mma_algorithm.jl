@@ -272,7 +272,7 @@ function optimize!(workspace::MMAWorkspace)
     optimobj = getoptimobj(dualobj, false)
 
     # Lower and upper bounds on the dual variables
-    λl = zeros(ni) .+ 1e-10
+    λl = zeros(ni)
     λu = fill(Inf, ni)
     λ .= 1
 
@@ -324,6 +324,9 @@ function optimize!(workspace::MMAWorkspace)
                     Optim.Fminbox(dualoptimizer),
                     dual_options,
                 ).minimizer
+                # Fminbox can return minimizers a hair outside its own
+                # bounds; clip so the next call's initial point is valid.
+                λ .= min.(max.(λ, λl), λu)
             end
             # Revaluate the optimal primal solution at the optimal dual solution
             dualobj(λ)

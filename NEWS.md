@@ -1,5 +1,10 @@
 # NEWS
 
+## Unreleased
+
+- Clip the dual minimizer back into its box after each Fminbox solve
+  (Optim can return iterates a hair outside the bounds, which the next
+  call rejects); set the dual lower bound to 0 instead of 1e-10.
 ## 1.3.6
 
 - Docs: the logo now appears only in the sidebar, not in the page body.
