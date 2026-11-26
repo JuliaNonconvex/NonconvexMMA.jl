@@ -1,6 +1,6 @@
 # NEWS
 
-## Unreleased
+## 1.3.7
 
 - Clip the dual minimizer back into its box after each Fminbox solve
   (Optim can return iterates a hair outside the bounds, which the next
